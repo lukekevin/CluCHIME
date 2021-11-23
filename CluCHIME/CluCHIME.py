@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+#created by Kevin Luke for MSc thesis project at TIFR, Mumbai
+
 
 
 from iautils.conversion import chime_intensity as ci
