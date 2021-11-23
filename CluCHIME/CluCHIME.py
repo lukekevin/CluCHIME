@@ -640,57 +640,12 @@ class CluCHIME:
         
        
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[56]:
-
-
+'''
 function='CLUSTERUTILS'
 REM=CluCHIME(function)
 
 
-# In[19]:
+
 
 
 Pathname1='/DATA/shriharsh/CHIME/multibeam_ML/astro_155769173/intensity/raw/1153/astro*.msgpack'
@@ -700,7 +655,7 @@ Pathname3='/DATA/shriharsh/CHIME/multibeam_ML/astro_155769173/intensity/raw/3153
 REM.Prepdata(Pathname1,Pathname2,Pathname3)
 
 
-# In[ ]:
+
 
 
 INT_un='INT_un.npz'
@@ -709,7 +664,7 @@ INT_combined1='INT_combined1.npz
 REM.Sub(INT_un,INT_n,INT_combined1)
 
 
-# In[31]:
+
 
 
 INT_un='INT_un.npz'
@@ -721,7 +676,7 @@ i=2694
 REM.Single(INT_un,INT_n,i)
 
 
-# In[ ]:
+
 
 
 INT_un='INT_un.npz'
@@ -730,7 +685,7 @@ INT_combined1='INT_combined1.npz
 REM.Add(INT_un,INT_n,INT_combined1)
 
 
-# In[61]:
+
 
 
 INT_un='INT_un.npz'
@@ -744,7 +699,7 @@ beam='3153CLEAN'
 REM.Iautils(INT_un,INTnewnorm_whole,Weight,fpga0,fpgan,dm,beam)
 
 
-# In[62]:
+
 
 
 FinalData='FinalData.npz'
@@ -752,358 +707,8 @@ TIMESERIES='TIMESERIES.npz'
 start=12200
 end=12400
 REM.Waterfaller(FinalData,TIMESERIES,start,end)
+'''
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[108]:
-
-
-Pathname1='/DATA/shriharsh/CHIME/multibeam_ML/astro_155769173/intensity/raw/1153/astro*.msgpack'
-Pathname2='/DATA/shriharsh/CHIME/multibeam_ML/astro_155769173/intensity/raw/2153/astro*.msgpack'
-Pathname3='/DATA/shriharsh/CHIME/multibeam_ML/astro_155769173/intensity/raw/3153/astro*.msgpack'
-
-RFI=CluCHIME(Pathname1,Pathname2,Pathname3)
-
-
-# In[8]:
-
-
-i=2694
-RFI.singleclustering(i)
-
-
-# In[10]:
-
-
-RFI.CLUSTERINGADD()
-
-
-# In[111]:
-
-
-'INT_un='INT_un.npz'
-INTnewnorm_whole='INT_newnorm_whole.npz'
-Weight='Weight.npz'
-fpga0='fpga0.npz'
-fpgan='fpgan.npz'
-dm=558.5
-beam='2153'
-
-RFI.Iautils(INT_un,INTnewnorm_whole,Weight,fpga0,fpgan,dm,beam)
-
-
-# In[112]:
-
-
-
-
-'FinalData='FinalData.npz'
-TIMESERIES='TIMESERIES.npz'
-start=12200
-end=12400
-RFI.Waterfaller(FinalData,TIMESERIES,start,end)
-
-
-# In[ ]:
 
 
 
