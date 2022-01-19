@@ -540,7 +540,7 @@ class CluCHIME:
         
         
   '''
-        Parameters
+        Parameters to be passed to cascade object. DOCUMENTATION TAKEN FROM IAUTILS by Dr Shriharsh Tendulkar et al
 
         eventid : int
             CHIME/FRB event ID.
@@ -668,6 +668,33 @@ class CluCHIME:
 
 
             #SUBBANDING
+            """
+            Params to be passed to process_cascade
+            Generate a dynamic spectrum object. Dedisperse, Subband,
+            Downsample and Mask according to the inputs. 
+            DOCUMENTATION TAKEN FROM IAUTILS by Dr Shriharsh Tendulkar et al
+
+            Parameters:
+            dm : int or float
+                DM to dedisperse the spectra to, in pc cm-3.
+            nsub : int
+                Number of subbands to downsample the frequency channels to.
+            downsample_factor : int, optional
+                A factor to downsample the time samples by. 1 by default.
+            dedisperse : bool, optional
+                Dedisperse? True by default.
+            subband : bool, optional
+                Subband? True by default.
+            downsample : bool, optional
+                Downsample? False by default.
+            mask : bool, optional
+                Mask? False by default.
+            zerodm : bool, optional
+                Subtract DM=0 timeseries? False by default.
+            scaleindep : bool, optional
+                Scale each channel independently? False by default.
+
+        """
 
         event.process_cascade(dm=dm, 
                                   nsub=64, 
