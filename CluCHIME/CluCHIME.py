@@ -534,66 +534,6 @@ class CluCHIME:
        
         '''
         
-        
-        
-        
-        
-        
-  '''
-        Parameters to be passed to cascade object. DOCUMENTATION TAKEN FROM IAUTILS by Dr Shriharsh Tendulkar et al
-
-        eventid : int
-            CHIME/FRB event ID.
-        intensities : list of array_like
-            List of 2D NumPy arrays containing radio intensity data for each
-            beam.
-        weights : list of array_like
-            List of NumPy arrays of weights. 
-        fbottom : float
-            Bottom observing frequency of the receiver bandwidth, in MHz.
-        df : float
-            Frequency channel width, in MHz.
-        tstart : float
-            Time at the start of the first sample, in s.
-        dt : float or list
-            Sampling time, in s. 
-        dm : float
-            Dispersion measure, in pc cm-3.
-      
-        beam_nos : list of str
-            Beam numbers (or names).
-        fpga0s : list of array_like
-            A list of FPGA zero-times of the first sample in each chunk.
-            Each list element should be an array of fpga0s for each beam.
-        fpgaNs : list of array_like
-            List of numbers of time samples in each chunk.
-            Each list element should be an array of fpgaNs for each beam.
-        event_time : datetime
-            UTC time stamp of the event.
-        fpga_time : int
-            FPGA time stamp of the event.
-        time_range : float
-            Bonsai event time uncertainty (due to coarse-graining).
-        dm_range : float
-            Bonsai DM uncertainty (due to coarse-graining).
-      
-        frame0_nanos : list of ndarray
-            List of frame0_nanos for each beam.
-         
-        binnings: list of floats
-            List of binning factors of the data for each beam.
-        detection_beam_nos : list of str
-            Beam numbers (or names) of beams that made detections.
-        max_beam_no : str
-            Beam number (or names) of beam that had the max S/N.
-        use_weights: bool, optional
-            Use the weights returned by rpc_client (removes dead channels,
-            negative intensities). Defaults to True.
-        use_rfi_masks: bool, optional
-            Use rfi_masks returned by rpc_client (removes values marked as
-            RFI by rf_pipelines). Not applied if using fitburst preprocessing.
-      
-        '''
 
         event_time = datetime.datetime.utcnow()
         fpga_time=481426529279
@@ -668,34 +608,7 @@ class CluCHIME:
 
 
             #SUBBANDING
-            """
-            Params to be passed to process_cascade
-            Generate a dynamic spectrum object. Dedisperse, Subband,
-            Downsample and Mask according to the inputs. 
-            DOCUMENTATION TAKEN FROM IAUTILS by Dr Shriharsh Tendulkar et al
-
-            Parameters:
-            dm : int or float
-                DM to dedisperse the spectra to, in pc cm-3.
-            nsub : int
-                Number of subbands to downsample the frequency channels to.
-            downsample_factor : int, optional
-                A factor to downsample the time samples by. 1 by default.
-            dedisperse : bool, optional
-                Dedisperse? True by default.
-            subband : bool, optional
-                Subband? True by default.
-            downsample : bool, optional
-                Downsample? False by default.
-            mask : bool, optional
-                Mask? False by default.
-            zerodm : bool, optional
-                Subtract DM=0 timeseries? False by default.
-            scaleindep : bool, optional
-                Scale each channel independently? False by default.
-
-        """
-
+            
         event.process_cascade(dm=dm, 
                                   nsub=64, 
                                   downsample_factor=1,
