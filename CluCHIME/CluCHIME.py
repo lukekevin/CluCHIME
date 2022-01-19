@@ -166,6 +166,7 @@ class CluCHIME:
             INT_n,
             INT_combined1):
         '''
+        Here we use Cluster exemplar subtraction method.
         We feed the unnormalised intensity array at INT_un and
         the normalised intensity array INT_n and the normalisation array INT_combined.
         Here we perform HDBSCAN clustering on the normalised data from Prepdata.
@@ -268,6 +269,13 @@ class CluCHIME:
                INT_un,
                INT_n,
                i):
+        '''
+        We perform HDBSCAN clustering on single channels of frequency.
+        We feed the unnormalised intensity array at INT_un and
+        the normalised intensity array INT_n and the normalisation array INT_combined.
+        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
+        Labels and Probaility are also  stored from  and they are stored.
+        '''
         
         self.INT_un=INT_un
         self.INT_n=INT_n
@@ -322,6 +330,18 @@ class CluCHIME:
             INT_un,
             INT_n,
             INT_combined1):
+         '''
+        Here we use Cluster exemplar addition method.
+        We feed the unnormalised intensity array at INT_un and
+        the normalised intensity array INT_n and the normalisation array INT_combined.
+        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
+        Labels and Probaility are also  stored from  and they are stored. Exemplars 
+        are also stored from HDBSCAN. Then the following algorithm is used:
+        1) Do clustering and save the exemplars.
+        2) ADD the nearest exemplar from the normalized 3 beam data.
+        3) Multiply the normalization with subtracted data.
+        More details is in Thesis.
+        '''
         
             self.INT_un=INT_un
             self.INT_n=INT_n
@@ -343,7 +363,7 @@ class CluCHIME:
             INT_prob1=[]  #probability
             INT_2d=[]     #labels
             INT_exemp=[]  #exemplars
-            for i in range(0,INT_2d.shape[0]):
+            for i in range(0,INT_n.shape[1]):
                 clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
                                           min_samples=None)
                 clusterer.fit(INT_n[:,i,:])
@@ -414,6 +434,22 @@ class CluCHIME:
                 fpgan,
                 dm,
                 beam):
+        
+        '''
+        After the exemplar subtraction has been done, the subtracted array is denormalized
+        using the normalization array we had saved in the beginning. Next on the denormalized array
+        from all 3 beams we apply various routines from IAUTILS.
+        The regular workflow on IAUTILS is as follows:
+        1) Declare various constants and input parameters to be passed to cascade object in
+        step 2.
+        2) Make a cascade object containing data/ spectrum with cascade.py .
+        3) Dedisperse the data in a cascade object.
+        4) Subband the data in a cascade object.
+        5) Apply various analysis routines to detect pulse, determine SNR, optimise DM,
+        generate TIMESERIES on the spectra object. After dedispersion and subbanding a
+        spectra object is created within the cascade object from spectra.py script that works in
+        tandem with cascade.py
+        '''
         
         
          
@@ -604,6 +640,11 @@ class CluCHIME:
                     TIMESERIES,
                     start, 
                     end) :
+        '''
+        Make a waterfall plot of the dedispersed,  subbanded array of
+        data from the spectra object which is created within the cascade object
+        '''
+        
         self.FinalData=FinalData
         self.start=start
         self.end=end
