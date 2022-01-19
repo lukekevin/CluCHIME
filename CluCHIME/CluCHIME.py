@@ -79,10 +79,11 @@ class CluCHIME:
         
         
     def Prepdata(self,
-                 pathname1 '''The strings of path of the data on disk.''', 
+                 pathname1 , 
                  pathname2,
                  pathname3):
         ''' 
+        The input are strings of path of the  beam data on disk.
         In Prepdata function the data is collected from the folder where 
         it is stored in .msgpack format. The data in .msgpack is in form of
         NUMPY arrays. The metadata from .msgpack is also saved which will 
@@ -164,6 +165,17 @@ class CluCHIME:
             INT_un,
             INT_n,
             INT_combined1):
+        '''
+        We feed the unnormalised intensity array at INT_un and
+        the normalised intensity array INT_n and the normalisation array INT_combined.
+        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
+        Labels and Probaility are also  stored from  and they are stored. Exemplars 
+        are also stored from HDBSCAN. Then the following algorithm is used:
+        1) Do clustering and save the exemplars.
+        2) Subtract the nearest exemplar from the normalized 3 beam data.
+        3) Multiply the normalization with subtracted data.
+        More details is in Thesis.
+        '''
         
         self.INT_un=INT_un
         self.INT_n=INT_n
@@ -187,7 +199,7 @@ class CluCHIME:
         INT_prob1=[]  #probability
         INT_2d=[]     #labels
         INT_exemp=[]  #exemplars
-        for i in range(0,len(I1)):
+        for i in range(0,INT_n.shape[1]):
             clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
                                       min_samples=None)
             clusterer.fit(INT_n[:,i,:])
@@ -222,8 +234,8 @@ class CluCHIME:
         INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
         ARGMIN=[]
 
-        for i in range(0,len(INT_2d)):
-            for j in range(0,len(I1[1])):
+        for i in range(0,INT_2d.shape[0]):
+            for j in range(0,INT_2d.shape[1]):
                 INT_exemp_combined=np.vstack(INT_exemp_part[i])
 
                 label=INT_2d_part[i,j]
@@ -331,7 +343,7 @@ class CluCHIME:
             INT_prob1=[]  #probability
             INT_2d=[]     #labels
             INT_exemp=[]  #exemplars
-            for i in range(0,len(INT_2d)):
+            for i in range(0,INT_2d.shape[0]):
                 clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
                                           min_samples=None)
                 clusterer.fit(INT_n[:,i,:])
@@ -364,8 +376,8 @@ class CluCHIME:
             INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
             ARGMIN=[]
 
-            for i in range(0,len(INT_2d)):
-                for j in range(0,len(I1[1])):
+            for i in range(0,INT_2d.shape[0]):
+                for j in range(0,INT_2d.shape[1]):
                     INT_exemp_combined=np.vstack(INT_exemp_part[i])
 
                     label=INT_2d_part[i,j]
@@ -496,37 +508,37 @@ class CluCHIME:
         beam = beam
 
         
-        if beam=='1153UNCLEAN':
+        if beam=='1_UNCLEAN':
             INTEN=INT_un1st
             WEIGHT=Weight1
             FPGA0=fpga01st
             FPGAN=fpgan1st
             
-        elif beam=='1153CLEAN':
+        elif beam=='1_CLEAN':
             INTEN=INTnewnorm_whole1st
             WEIGHT=Weight1
             FPGA0=fpga01st
             FPGAN=fpgan1st
         
-        elif beam=='2153UNCLEAN':
+        elif beam=='2_UNCLEAN':
             INTEN=INT_un2nd
             WEIGHT=Weight2
             FPGA0=fpga02nd
             FPGAN=fpgan2nd
             
-        elif beam=='2153CLEAN':
+        elif beam=='2_CLEAN':
             INTEN=INTnewnorm_whole2nd
             WEIGHT=Weight2
             FPGA0=fpga02nd
             FPGAN=fpgan2nd
             
-        elif beam=='3153UNCLEAN':
+        elif beam=='3_UNCLEAN':
             INTEN=INT_un3rd
             WEIGHT=Weight3
             FPGA0=fpga03rd
             FPGAN=fpgan3rd
             
-        elif beam=='3153CLEAN':
+        elif beam=='3_CLEAN':
             INTEN=INTnewnorm_whole3rd
             WEIGHT=Weight3
             FPGA0=fpga03rd
