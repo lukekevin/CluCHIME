@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-#created by Kevin Luke for MSc thesis project at TIFR, Mumbai
-
+'''
+Author: Kevin Luke 
+CluCHIME.py was made for MSc thesis project at TIFR, Mumbai
+Date created:
+Date last modified: Jan 20 2022
+'''
 
 
 from iautils.conversion import chime_intensity as ci
@@ -32,15 +35,8 @@ import matplotlib.pyplot as plt
 from frb_common import common_utils
 from iautils import cascade, spectra, spectra_utils
 from iautils.conversion import chime_intensity
-
 from numpy import inf
-
-
-
 import glob 
-
-
-
 
 
 class CluCHIME:
@@ -436,6 +432,7 @@ class CluCHIME:
                 beam):
         
         '''
+         
         After the exemplar subtraction has been done, the subtracted array is denormalized
         using the normalization array we had saved in the beginning. Next on the denormalized array
         from all 3 beams we apply various routines from IAUTILS.
@@ -534,8 +531,69 @@ class CluCHIME:
             INTMEANSTD=INTMEANREMOVED/INTSTD
             INTmeanstd.append(INTMEANSTD)
         INTmeanstd=np.array(INTmeanstd)
+       
         '''
+        
+        
+        
+        
+        
+        
+  '''
+        Parameters
 
+        eventid : int
+            CHIME/FRB event ID.
+        intensities : list of array_like
+            List of 2D NumPy arrays containing radio intensity data for each
+            beam.
+        weights : list of array_like
+            List of NumPy arrays of weights. 
+        fbottom : float
+            Bottom observing frequency of the receiver bandwidth, in MHz.
+        df : float
+            Frequency channel width, in MHz.
+        tstart : float
+            Time at the start of the first sample, in s.
+        dt : float or list
+            Sampling time, in s. 
+        dm : float
+            Dispersion measure, in pc cm-3.
+      
+        beam_nos : list of str
+            Beam numbers (or names).
+        fpga0s : list of array_like
+            A list of FPGA zero-times of the first sample in each chunk.
+            Each list element should be an array of fpga0s for each beam.
+        fpgaNs : list of array_like
+            List of numbers of time samples in each chunk.
+            Each list element should be an array of fpgaNs for each beam.
+        event_time : datetime
+            UTC time stamp of the event.
+        fpga_time : int
+            FPGA time stamp of the event.
+        time_range : float
+            Bonsai event time uncertainty (due to coarse-graining).
+        dm_range : float
+            Bonsai DM uncertainty (due to coarse-graining).
+      
+        frame0_nanos : list of ndarray
+            List of frame0_nanos for each beam.
+         
+        binnings: list of floats
+            List of binning factors of the data for each beam.
+        detection_beam_nos : list of str
+            Beam numbers (or names) of beams that made detections.
+        max_beam_no : str
+            Beam number (or names) of beam that had the max S/N.
+        use_weights: bool, optional
+            Use the weights returned by rpc_client (removes dead channels,
+            negative intensities). Defaults to True.
+        use_rfi_masks: bool, optional
+            Use rfi_masks returned by rpc_client (removes values marked as
+            RFI by rf_pipelines). Not applied if using fitburst preprocessing.
+      
+        '''
 
         event_time = datetime.datetime.utcnow()
         fpga_time=481426529279
@@ -583,7 +641,7 @@ class CluCHIME:
             
             
             
-            
+      
         event = cascade.Cascade(intensities=[INTEN], 
                                     weights=[WEIGHT], 
                                     beam_nos=[beam],
