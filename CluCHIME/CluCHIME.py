@@ -103,7 +103,7 @@ class CluCHIME:
         self.pathname2=pathname2
         self.pathname3=pathname3
         
-        '''Collecting the data from designated path'''
+        #Collecting the data from designated path
         filelist1=glob.glob(self.pathname1)
         filelist1.sort()
         I1,Weight1,bins1,fpga01st,fpgan1st,frame_nano1,rfi_mask1=chime_intensity.unpack_datafiles(filelist1)
@@ -118,7 +118,7 @@ class CluCHIME:
         filelist3.sort()
         I3,Weight3,bins3,fpga03rd,fpgan3rd,frame_nano3,rfi_mask3=chime_intensity.unpack_datafiles(filelist3)
          
-        '''Savingthe metadata from .msgpack data'''    
+        #Savingthe metadata from .msgpack data    
         #metadata
         Weight=np.array([Weight1,Weight2,Weight3])
         savez_compressed('Weight.npz',Weight)
@@ -138,7 +138,7 @@ class CluCHIME:
         bins=np.array([bins1,bins2,bins3])
         savez_compressed('bins.npz',bins)
         
-        '''processing and collating the data'''
+        #processing and collating the data
         #collating the 3 beam data into one mega array
         INT_un=np.array([I1,I2,I3])  #unclean unnormalised mega array
         #declaring the normalisation
@@ -165,7 +165,9 @@ class CluCHIME:
         Here we use Cluster exemplar subtraction method.
         We feed the unnormalised intensity array at INT_un and
         the normalised intensity array INT_n and the normalisation array INT_combined.
-        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
+        Here we perform HDBSCAN clustering on the normalised data from Prepdata. 
+        For HDBSCAN I dont provide the option to change the min cluster size and min sample size 
+        parameters as those defined parameters give the better clustering for this data.
         Labels and Probaility are also  stored from  and they are stored. Exemplars 
         are also stored from HDBSCAN. Then the following algorithm is used:
         1) Do clustering and save the exemplars.
@@ -177,7 +179,8 @@ class CluCHIME:
         self.INT_un=INT_un
         self.INT_n=INT_n
         self.INT_combined1=INT_combined1
-       
+        
+        #Loading the arrays 
         INT_un=np.load('INT_un.npz')
         INT_un=INT_un['arr_0']
         
@@ -190,9 +193,9 @@ class CluCHIME:
         
     
         
-        #entire 16384 channels HDBSCAN
+        #Run HDBSCAN on entire 16384 channels
         start=time.time()
-
+        
         INT_prob1=[]  #probability
         INT_2d=[]     #labels
         INT_exemp=[]  #exemplars
@@ -209,28 +212,27 @@ class CluCHIME:
             INT_2d.append(INT_pred)
             INT_prob1.append(INT_prob)
 
-
+        #convert the python lists from HDBSCAN to numpy arrays
         INT_prob1=np.array(INT_prob1)
         INT_2d=np.array(INT_2d)
         INT_exemp=np.array(INT_exemp) 
 
 
-
+        #save the arrays as comprressed numpy files, .npz files
         savez_compressed('INT_prob1.npz',INT_prob1)
         savez_compressed('INT_2d.npz',INT_2d)
         savez_compressed('INT_exemp.npz',INT_exemp)
 
 
 
-        #exemplar subtraction
-
-
+        #Exemplar subtraction algorithm
+        #Just renaming the arrays to be fed in the for loop 
         INT_n_part=INT_n
         INT_2d_part=INT_2d
         INT_exemp_part=INT_exemp
         INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
         ARGMIN=[]
-
+        #The ACTUAL SUBTRACTION ALGORITHM
         for i in range(0,INT_2d.shape[0]):
             for j in range(0,INT_2d.shape[1]):
                 INT_exemp_combined=np.vstack(INT_exemp_part[i])
@@ -251,12 +253,17 @@ class CluCHIME:
 
 
         end=time.time()
-        print(end-start)
-        print(INTnew.shape)    
+        print('Time taken for code run in sec:',end-start)
+        print('The subtracted normalised array has shape:',INTnew.shape)
+        
+        #Save the normalised subtracted array
+        print('Saving the subtracted normalised array')
         savez_compressed('INTnew.npz',INTnew)
         
         
-        #denormalise the array
+        #denormalise the subtracted array
+        print('Denormalising the normalised subtracted array')
+        print('Saving the denormalised array')
         INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
         savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
  
@@ -277,12 +284,13 @@ class CluCHIME:
         self.INT_n=INT_n
         self.i=i
         
+        #Load the numpy .npz arrays
         INT_un=np.load('INT_un.npz')
         INT_un=INT_un['arr_0']
         INT_n=np.load('INT_n.npz')
         INT_n=INT_n['arr_0']
         
-        
+        #Perform HDBSCAN on single channels of frequencies
         start=time.time()
         clusterer=hdbscan.HDBSCAN(min_cluster_size=17,
                                   min_samples=16,
@@ -296,9 +304,11 @@ class CluCHIME:
         INT_exemp_part=clusterer.exemplars_
         n_clusters_=len(set(INT_2d)) -(1 if -1 in INT_2d else 0)
         end=time.time()
-        print(end-start)
-        print(n_clusters_)
-
+        print('Time taken in sec:',end-start)
+        print('No of clusters detected by HDBSCAN',n_clusters_)
+        
+        print('Plotting the scattering plots in the 3 dimensional intensoty space')
+        
         get_ipython().run_line_magic('matplotlib', 'inline')
         plt.figure(figsize=(5,5))
 
