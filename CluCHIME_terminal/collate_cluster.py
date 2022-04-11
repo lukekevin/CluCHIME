@@ -1,3 +1,10 @@
+'''
+Author: Kevin Luke 
+CluCHIME.py was made for MSc thesis project at TIFR, Mumbai
+Date created: 11 April 2022
+Date last modified: 11 April  2022
+'''
+
 import argparse
 import numpy as np
 from numpy import savez_compressed 
@@ -10,7 +17,8 @@ import seaborn as sns
 
 
 ''' 
-For running CluCHIME library successfully you will
+THIS IS VERSION OF CODE CAN BE EXECUTED DIRECTLY FROM A TERMINAL
+For running this code successfully you will
 need NUMPY, SCIPY, Scikit-Learn, IAUTILS and frb-common utils preinstalled.
 The later 2 libraries are closed CHIME/FRB libraries from GITHUB. The code 
 is slow and not efficiet in terms of memory usage and needs to updated 
