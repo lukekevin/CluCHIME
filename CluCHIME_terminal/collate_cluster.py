@@ -2,7 +2,7 @@
 Author: Kevin Luke 
 CluCHIME.py was made for MSc thesis project at TIFR, Mumbai
 Date created: 11 April 2022
-Date last modified: 11 April  2022
+Date last modified: 12 April  2022
 '''
 
 import argparse
@@ -30,7 +30,8 @@ the run times will be much higher.
     
 def collate(path1, 
             path2,
-            path3):
+            path3
+            out_dir):
     ''' 
     Prepping the DATA.
 
@@ -71,22 +72,22 @@ def collate(path1,
     #Savingthe metadata from .msgpack data    
     #metadata
     Weight=np.array([Weight1,Weight2,Weight3])
-    savez_compressed('Weight.npz',Weight)
+    savez_compressed(out_dir+'Weight.npz',Weight)
 
     fpgan=np.array([fpgan1st,fpgan2nd,fpgan3rd])
-    savez_compressed('fpgan.npz',fpgan)
+    savez_compressed(out_dir+'fpgan.npz',fpgan)
 
     fpga0=np.array([fpga01st,fpga02nd,fpga03rd])
-    savez_compressed('fpga0.npz',fpga0)
+    savez_compressed(out_dir'+'fpga0.npz',fpga0)
 
     rfi_mask=np.array([rfi_mask1,rfi_mask2,rfi_mask3,])
-    savez_compressed('rfi_mask.npz',rfi_mask)
+    savez_compressed(out_dir+'rfi_mask.npz',rfi_mask)
 
     frame_nano=np.array([frame_nano1,frame_nano2,frame_nano3])
-    savez_compressed('frame_nano.npz',frame_nano)
+    savez_compressed(out_dir+'frame_nano.npz',frame_nano)
 
     bins=np.array([bins1,bins2,bins3])
-    savez_compressed('bins.npz',bins)
+    savez_compressed(out_dirh+'bins.npz',bins)
 
     #processing and collating the data
     #collating the 3 beam data into one mega array
@@ -99,14 +100,19 @@ def collate(path1,
     INT_n0=INT_un*INT_combined1
     INT_n=INT_n0.T  #unclean normalised mega array
     #saving the 3 arrays from above process in .npz format on disk
-    savez_compressed('INT_combined1.npz',INT_combined1)
-    savez_compressed('INT_un.npz',INT_un)
-    savez_compressed('INT_n.npz',INT_n)
+    savez_compressed(out_dir+'INT_combined1.npz',INT_combined1)
+    savez_compressed(out_dir+'INT_un.npz',INT_un)
+    savez_compressed(out_dir+'INT_n.npz',INT_n)
     
     print('Shape of unnormalised array')
     print(INT_un.shape)
     print('Shape of normalised array')
     print(INT_n.shape)
+    
+    '''
+    returning the array so they can be used directly when they are required 
+    in other parts of code
+    '''
     return INT_un, INT_n,INT_combined1
     
 def Single(INT_n,i):
@@ -147,12 +153,14 @@ def Single(INT_n,i):
                 marker=".",
                 alpha=1,
                 c=cluster_member_colors)
-    plt.savefig('cluster.jpg')
+    plt.savefig(out_dir+'clustered_plot.jpg')
 
 
     
     
-def Sub(INT_n,INT_combined1):
+def Sub(INT_n,
+        INT_combined1,
+        out_dir):
     '''
     Here we use Cluster exemplar subtraction method.
     We feed the unnormalised intensity array at INT_un and
@@ -192,9 +200,9 @@ def Sub(INT_n,INT_combined1):
 
 
     #save the arrays as comprressed numpy files, .npz files
-    savez_compressed('INT_prob1.npz',INT_prob1)
-    savez_compressed('INT_2d.npz',INT_2d)
-    savez_compressed('INT_exemp.npz',INT_exemp)
+    savez_compressed(out_dir+'INT_prob1.npz',INT_prob1)
+    savez_compressed(out_dir+'INT_2d.npz',INT_2d)
+    savez_compressed(out_dir+'INT_exemp.npz',INT_exemp)
 
     #Exemplar subtraction algorithm
     #Just renaming the arrays to be fed in the for loop 
@@ -227,18 +235,20 @@ def Sub(INT_n,INT_combined1):
 
     #Save the normalised subtracted array
     print('Saving the subtracted normalised array')
-    savez_compressed('INTnew.npz',INTnew)
+    savez_compressed(out_dir+'INTnew.npz',INTnew)
 
 
     #denormalise the subtracted array
     print('Denormalising the normalised subtracted array')
     print('Saving the denormalised array')
     INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
-    savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
+    savez_compressed(out_dir+'INTnewnorm_whole.npz',(INTnewnorm_whole))
 
     
     
-def Add(INT_n,INT_combined1):
+def Add(INT_n,
+        INT_combined1,
+        outdir):
     '''
     Here we use Cluster exemplar addition method.
     We feed the unnormalised intensity array at INT_un and
@@ -274,9 +284,9 @@ def Add(INT_n,INT_combined1):
         INT_2d=np.array(INT_2d)
         INT_exemp=np.array(INT_exemp)
 
-        savez_compressed('INT_prob1.npz',INT_prob1)
-        savez_compressed('INT_2d.npz',INT_2d)
-        savez_compressed('INT_exemp.npz',INT_exemp)
+        savez_compressed(out_dir+'INT_prob1.npz',INT_prob1)
+        savez_compressed(out_dir+'INT_2d.npz',INT_2d)
+        savez_compressed(out_dir+'INT_exemp.npz',INT_exemp)
 
         #exemplar subtraction
         INT_n_part=INT_n
@@ -305,43 +315,70 @@ def Add(INT_n,INT_combined1):
 
 
         print(INTnew.shape)    
-        savez_compressed('INTnew.npz',INTnew)
+        savez_compressed(out_dir+'INTnew.npz',INTnew)
 
         #denormalise the array
         INTnewnorm_whole=(INTnew.T+1)/INT_combined1 #cleaned unnorm array
-        savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
+        savez_compressed(out_dir+'INTnewnorm_whole.npz',(INTnewnorm_whole))
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('pathname1', type=str)
-    parser.add_argument('pathname2', type=str)
-    parser.add_argument('pathname3', type=str)
-    parser.add_argument('--range', type=str, default=None,help='single/full 16k channels')
-    parser.add_argument('--technique', type=str, default=None,help='add/sub for full channels')
+    parser.add_argument('--pathname1',
+                        type=str, 
+                        help='Data path for glob process where .msgpack for beam 1 is stored')
+    parser.add_argument('--pathname2',
+                        type=str, 
+                        help='Data path for glob process where .msgpack for beam 2 is stored')
+    parser.add_argument('--pathname3', 
+                        type=str, 
+                        help='Data path for glob process where .msgpack for beam 3 is stored')
+    parser.add_argument('--out_dir_path', 
+                        type=str, 
+                        help='Path where the processed data will be dumped')
+    parser.add_argument('--range', 
+                        type=str, 
+                        help='choose clustering for either single/full 16k channels')
+    parser.add_argument('--technique', 
+                        type=str,
+                        help=' if chosen for full channels then choose add/sub method')
     
     args = parser.parse_args()
     
     pathname1=args.pathname1
     pathname2=args.pathname2
     pathname3=args.pathname3
+    out_dir_path=args.out_path_dir
     
-   #collate(pathname1, pathname2, pathname3)
+    out_dir = out_dir_path + 'cluchime_clustering_code' + "/"
+    os.makedirs(out_dir, exist_ok=True)
     
     INT_un,INT_n,INT_combined1=collate(pathname1,
                                       pathname2,
-                                      pathname3)
+                                      pathname3,
+                                      out_dir)
     if args.range=='single':
         print('Input frequency channel number from 0-16384')
         freq_channel=int(input())
-        Single(INT_n,freq_channel)
+        Single(INT_n,
+               freq_channel,
+               out_dir)
         
     elif args.range=='full':
+         print('Running clustering and subsequent process over full data')
         if args.technique=='sub':
-            Sub(INT_n, INT_combined1)
+         print('Choosing Sub method for full data processing')
+         print('See theses, contact me for more information on these two methods')
+            Sub(INT_n,
+                INT_combined1,
+                out_dir)
             
         elif args.technique=='add':
-            Add(INT_n,INT_combined1)
+             print('Choosing Add method for full data processing')
+             print('See theses, contact me for more information on these two methods')
+            Add(INT_n,
+                INT_combined1,
+                out_dir)
             
             
