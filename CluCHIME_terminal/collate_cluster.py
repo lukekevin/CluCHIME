@@ -370,14 +370,14 @@ if __name__ == '__main__':
         if args.technique=='sub':
            print('Choosing Sub method for full data processing')
            print('See theses, contact me for more information on these two methods')
-            Sub(INT_n,
+           Sub(INT_n,
                 INT_combined1,
                 out_dir)
             
         elif args.technique=='add':
              print('Choosing Add method for full data processing')
              print('See theses, contact me for more information on these two methods')
-            Add(INT_n,
+             Add(INT_n,
                 INT_combined1,
                 out_dir)
             
