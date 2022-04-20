@@ -368,8 +368,8 @@ if __name__ == '__main__':
     elif args.range=='full':
          print('Running clustering and subsequent process over full data')
         if args.technique=='sub':
-         print('Choosing Sub method for full data processing')
-         print('See theses, contact me for more information on these two methods')
+           print('Choosing Sub method for full data processing')
+           print('See theses, contact me for more information on these two methods')
             Sub(INT_n,
                 INT_combined1,
                 out_dir)
