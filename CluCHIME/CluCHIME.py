@@ -654,10 +654,3 @@ class CluCHIME:
                                   min_width=1, 
                                   max_width=10, 
                                   plot=True)
-        
-        
-       
-        
-
-
-
