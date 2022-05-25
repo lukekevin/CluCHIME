@@ -8,20 +8,17 @@ Date last modified: Jan 20 2022
 '''
 
 
-from iautils.conversion import chime_intensity as ci
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sklearn.datasets import make_blobs
-from numpy import quantile, where, random
-from mpl_toolkits import mplot3d
-from sklearn.cluster import DBSCAN
+from matplotlib import gridspec
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import time
 from numpy import asarray
+
 from numpy import savetxt 
-from sklearn.cluster import OPTICS, cluster_optics_dbscan
 import hdbscan
 import seaborn as sns
 from numpy import save
@@ -30,6 +27,7 @@ from numpy import savez_compressed
 import datetime, time
 from frb_common import common_utils
 from iautils import cascade, spectra, spectra_utils
+
 from iautils.conversion import chime_intensity
 from numpy import inf
 import glob 
@@ -154,16 +152,15 @@ class CluCHIME:
         self.INT_combined1=INT_combined1
         
         #Loading the arrays 
-      
         INT_n=np.load('INT_n.npz')
         INT_n=INT_n['arr_0']
         
         INT_combined1=np.load('INT_combined1.npz')
         INT_combined1=INT_combined1['arr_0']
        
-        
-    
-        
+
+
+
         #Run HDBSCAN on entire 16384 channels
         start=time.time()
         
@@ -237,8 +234,7 @@ class CluCHIME:
         print('Saving the denormalised array')
         INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
         savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
- 
-
+        
     def Single(self,
                INT_n,
                i):
@@ -314,85 +310,84 @@ class CluCHIME:
         3) Multiply the normalization with subtracted data.
         More details is in Thesis.
         '''
-        
-            self.INT_n=INT_n
-            self.INT_combined1=INT_combined1
+        self.INT_n=INT_n
+        self.INT_combined1=INT_combined1
 
-            INT_n=np.load('INT_n.npz')
-            INT_n=INT_n['arr_0']
+        INT_n=np.load('INT_n.npz')
+        INT_n=INT_n['arr_0']
 
-            INT_combined1=np.load('INT_combined1.npz')
-            INT_combined1=INT_combined1['arr_0']
- 
-            
-            #entire 16384 channels HDBSCAN
-            start=time.time()
-
-            INT_prob1=[]  #probability
-            INT_2d=[]     #labels
-            INT_exemp=[]  #exemplars
-            for i in range(0,INT_n.shape[1]):
-                clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
-                                          min_samples=None)
-                clusterer.fit(INT_n[:,i,:])
-                INT_pred=clusterer.labels_
-                n_clusters_=len(set(INT_pred)) -(1 if -1 in INT_pred else 0)
-                INT_pred=clusterer.labels_
-                INT_prob=clusterer.probabilities_
-
-                INT_exemp.append(clusterer.exemplars_)
-                INT_2d.append(INT_pred)
-                INT_prob1.append(INT_prob)
+        INT_combined1=np.load('INT_combined1.npz')
+        INT_combined1=INT_combined1['arr_0']
 
 
-            INT_prob1=np.array(INT_prob1)
-            INT_2d=np.array(INT_2d)
-            INT_exemp=np.array(INT_exemp)
-            
-            savez_compressed('INT_prob1.npz',INT_prob1)
-            savez_compressed('INT_2d.npz',INT_2d)
-            savez_compressed('INT_exemp.npz',INT_exemp)
+        #entire 16384 channels HDBSCAN
+        start=time.time()
+
+        INT_prob1=[]  #probability
+        INT_2d=[]     #labels
+        INT_exemp=[]  #exemplars
+        for i in range(0,INT_n.shape[1]):
+            clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
+                                      min_samples=None)
+            clusterer.fit(INT_n[:,i,:])
+            INT_pred=clusterer.labels_
+            n_clusters_=len(set(INT_pred)) -(1 if -1 in INT_pred else 0)
+            INT_pred=clusterer.labels_
+            INT_prob=clusterer.probabilities_
+
+            INT_exemp.append(clusterer.exemplars_)
+            INT_2d.append(INT_pred)
+            INT_prob1.append(INT_prob)
+
+
+        INT_prob1=np.array(INT_prob1)
+        INT_2d=np.array(INT_2d)
+        INT_exemp=np.array(INT_exemp)
+
+        savez_compressed('INT_prob1.npz',INT_prob1)
+        savez_compressed('INT_2d.npz',INT_2d)
+        savez_compressed('INT_exemp.npz',INT_exemp)
 
 
 
-            #exemplar subtraction
+        #exemplar subtraction
 
-            INT_n_part=INT_n
-            INT_2d_part=INT_2d
-            INT_exemp_part=INT_exemp
-            INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
-            ARGMIN=[]
+        INT_n_part=INT_n
+        INT_2d_part=INT_2d
+        INT_exemp_part=INT_exemp
+        INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
+        ARGMIN=[]
 
-            for i in range(0,INT_2d.shape[0]):
-                for j in range(0,INT_2d.shape[1]):
-                    INT_exemp_combined=np.vstack(INT_exemp_part[i])
+        for i in range(0,INT_2d.shape[0]):
+            for j in range(0,INT_2d.shape[1]):
+                INT_exemp_combined=np.vstack(INT_exemp_part[i])
 
-                    label=INT_2d_part[i,j]
-                    value=INT_n_part[j,i,:]
+                label=INT_2d_part[i,j]
+                value=INT_n_part[j,i,:]
 
-                    if label!=-1:
+                if label!=-1:
 
-                        argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
-                        INTnew[j,i,:]=value+(INT_exemp_part[i][label][argmin])
+                    argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
+                    INTnew[j,i,:]=value+(INT_exemp_part[i][label][argmin])
 
-                    else:
-                        argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
-                        INTnew[j,i,:]=value+INT_exemp_combined[argmin]
+                else:
+                    argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
+                    INTnew[j,i,:]=value+INT_exemp_combined[argmin]
 
-                    ARGMIN.append(argmin)    
-
-
-            end=time.time()
-            print(end-start)
-            print(INTnew.shape)    
-            savez_compressed('INTnew.npz',INTnew)
+                ARGMIN.append(argmin)    
 
 
-            #denormalise the array
-            INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
-            savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
-            
-            
+        end=time.time()
+        print(end-start)
+        print(INTnew.shape)    
+        savez_compressed('INTnew.npz',INTnew)
+
+
+        #denormalise the array
+        INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
+        savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
+
+
     def Iautils(self, 
                 INTnewnorm_whole, 
                 INT_un, 
@@ -486,8 +481,7 @@ class CluCHIME:
         INT_un3rd=copy.copy(INT_un3rd)
                
         
-     
-        #meanSTD removal
+     #meanSTD removal
         '''
         INTcascade=INTnewnorm_whole2nd
 
@@ -549,7 +543,6 @@ class CluCHIME:
             
             
           #Cascade object from cascade.py     
-      
         event = cascade.Cascade(intensities=[INTEN], 
                                     weights=[WEIGHT], 
                                     beam_nos=[beam],
@@ -578,15 +571,15 @@ class CluCHIME:
             #SUBBANDING
             
         event.process_cascade(dm=dm, 
-                                  nsub=64, 
-                                  downsample_factor=1,
-                                  dedisperse=True, 
-                                  subband=True,
-                                  downsample=True, 
-                                  mask=False,
-                                  zerodm=False, 
-                                  scaleindep=True,
-                                  )
+                              nsub=64, 
+                              downsample_factor=1,
+                              dedisperse=True, 
+                              subband=True,
+                              downsample=True, 
+                              mask=False,
+                              zerodm=False, 
+                              scaleindep=True,
+                              )
 
             #making timeseries
         TIMESERIES=((event.beams[0].generate_timeseries())[0])
@@ -621,34 +614,44 @@ class CluCHIME:
         
         TIMESERIES=np.load('TIMESERIES.npz')
         TIMESERIES=TIMESERIES['arr_0']
-       
+        
         #MANUAL WATERFALLING
-        SNR=spectra.smoothed_peak_snr(timeseries=TIMESERIES[self.start:self.end],width=2)
+        time_series=TIMESERIES[self.start:self.end]/np.sqrt(FinalData.shape[0])
+        SNR=spectra.smoothed_peak_snr(timeseries=time_series)
         print('smoothed peaked SNR:',SNR[0])
         get_ipython().run_line_magic('matplotlib', 'inline')
-        plt.figure(figsize=(10,10))
-        plt.subplot(2,1,1)
-        plt.pcolormesh((FinalData[:,self.start:self.end]),
-                       cmap='viridis',
-                       vmin=-4,
-                       vmax=4)
-        #plt.pcolormesh((event.beams[0].intensity[:,12200:12300]),cmap='viridis',vmin=-4,vmax=4)
-        #plt.subplot(2,1,1)
-        #plt.plot(TIMESERIES[12200:12300])
+        
+        
+        fig = plt.figure(figsize=(10, 10), dpi=50)
+        spec = gridspec.GridSpec(ncols=1, 
+                                 nrows=2, 
+                                 height_ratios=[2, 4])
+        
+        ax1 = fig.add_subplot(spec[0])
+        ax1.plot(time_series)
+        ax1.set_ylabel('SNR / bin ($\\sigma$ units)', fontsize=18)
+        
+        fbins=np.round(np.linspace(0,FinalData.shape[0],10))
+        ax2 = fig.add_subplot(spec[1])
+        imwf = ax2.imshow(np.flip((FinalData[:,self.start:self.end]),axis=0),
+                          aspect="auto",
+                          vmax=10, vmin=-10)
+        ax2.set_yticks(fbins)
+        ax2.set_yticklabels(np.round(np.flip(np.linspace(400,800,10))))
+        ax2.set_ylabel("Frequency (MHz)", fontsize=18)
+        tbins=np.round(np.linspace(0,(FinalData[:,self.start:self.end]).shape[1],5),1)
+        ax2.set_xticks(tbins)
+        ax2.set_xticklabels(np.round(np.linspace(self.start/1000,self.end/1000,5),1))
+        ax2.set_xlabel("Time (s)", fontsize=18)
 
-        plt.xlabel('Time in ms')
-        plt.ylabel('Freq subbands')
-        plt.colorbar() 
+       # Adjust the colorbar on this axes alongside tables
         
+        divider = make_axes_locatable(ax2)
+        cax = divider.append_axes("right", size="1%", pad=0.001)
+        plt.colorbar(imwf, cax=cax)
+        fig.subplots_adjust(.1, .1, .95, .95, 0, 0)
+        fig.savefig('Waterfall_Timeseries.jpg', dpi=300)
         
-        plt.figure(figsize=(10,10))
-        plt.subplot(2,1,2)    
-        plt.xlabel('Time in ms')
-        plt.ylabel('Intensity')
-        plt.plot(TIMESERIES[self.start:self.end])
-        
-        
-        #FIND BURST SNR
         spectra.find_burst((TIMESERIES[self.start:self.end]), 
                                   width_factor=10, 
                                   min_width=1, 
