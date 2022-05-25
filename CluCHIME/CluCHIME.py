@@ -81,17 +81,35 @@ class CluCHIME:
         #Collecting the data from designated path
         filelist1=glob.glob(self.pathname1)
         filelist1.sort()
-        I1,Weight1,bins1,fpga01st,fpgan1st,frame_nano1,rfi_mask1=chime_intensity.unpack_datafiles(filelist1)
+        (I1,
+         Weight1,
+         bins1,
+         fpga01st,
+         fpgan1st,
+         frame_nano1,
+         rfi_mask1)=chime_intensity.unpack_datafiles(filelist1)
 
 
         filelist2=glob.glob(self.pathname2)
         filelist2.sort()
-        I2,Weight2,bins2,fpga02nd,fpgan2nd,frame_nano2,rfi_mask2=chime_intensity.unpack_datafiles(filelist2)
+        (I2,
+         Weight2,
+         bins2,
+         fpga02nd,
+         fpgan2nd,
+         frame_nano2,
+         rfi_mask2)=chime_intensity.unpack_datafiles(filelist2)
 
 
         filelist3=glob.glob(self.pathname3)
         filelist3.sort()
-        I3,Weight3,bins3,fpga03rd,fpgan3rd,frame_nano3,rfi_mask3=chime_intensity.unpack_datafiles(filelist3)
+        (I3,
+         Weight3,
+         bins3,
+         fpga03rd,
+         fpgan3rd,
+         frame_nano3,
+         rfi_mask3)=chime_intensity.unpack_datafiles(filelist3)
          
         #Savingthe metadata from .msgpack data    
         #metadata
