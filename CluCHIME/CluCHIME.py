@@ -11,17 +11,15 @@ Date last modified: 25 May 2022
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+
 import numpy as np
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from sklearn.datasets import make_blobs
-from numpy import quantile, where, random
-from mpl_toolkits import mplot3d
-from sklearn.cluster import DBSCAN
+
 import time
 from numpy import asarray
 from numpy import savetxt 
-from sklearn.cluster import OPTICS, cluster_optics_dbscan
+
 import hdbscan
 import seaborn as sns
 from numpy import save
@@ -608,7 +606,3 @@ class CluCHIME:
                                   min_width=1, 
                                   max_width=10, 
                                   plot=True)
-       
-        
-        
-        
