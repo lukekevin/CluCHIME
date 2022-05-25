@@ -158,22 +158,22 @@ def Single(INT_n,i):
 
     
     
-def Sub(INT_n,
+def Full_Channel_Cluster(INT_n,
         INT_combined1,
-        out_dir):
+        out_dir,
+        method):
     '''
-    Here we use Cluster exemplar subtraction method.
-    We feed the unnormalised intensity array at INT_un and
-    the normalised intensity array INT_n and the normalisation array INT_combined.
-    Here we perform HDBSCAN clustering on the normalised data from Prepdata. 
-    For HDBSCAN I dont provide the option to change the min cluster size and min sample size 
-    parameters as those defined parameters give the better clustering for this data.
-    Labels and Probaility are also  stored from  and they are stored. Exemplars 
-    are also stored from HDBSCAN. Then the following algorithm is used:
+    The following algorithm is used for SUB method:
     1) Do clustering and save the exemplars.
     2) Subtract the nearest exemplar from the normalized 3 beam data.
     3) Multiply the normalization with subtracted data.
     More details is in Thesis.
+    
+    
+    Then the following algorithm is used for ADD method:
+    1) Do clustering and save the exemplars.
+    2) ADD the nearest exemplar from the normalized 3 beam data.
+    3) Multiply the normalization with subtracted data.
     '''
     
    #Run HDBSCAN on entire 16384 channels
@@ -211,91 +211,43 @@ def Sub(INT_n,
     INT_exemp_part=INT_exemp
     INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
     ARGMIN=[]
-    #The ACTUAL SUBTRACTION ALGORITHM
-    for i in range(0,INT_2d.shape[0]):
-        for j in range(0,INT_2d.shape[1]):
-            INT_exemp_combined=np.vstack(INT_exemp_part[i])
-
-            label=INT_2d_part[i,j]
-            value=INT_n_part[j,i,:]
-
-            if label!=-1:
-
-                argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
-                INTnew[j,i,:]=value-(INT_exemp_part[i][label][argmin])
-
-            else:
-                argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
-                INTnew[j,i,:]=value-INT_exemp_combined[argmin]
-
-            ARGMIN.append(argmin)    
-
-    print('Time taken for code run in sec:',end-start)
-    print('The subtracted normalised array has shape:',INTnew.shape)
-
-    #Save the normalised subtracted array
-    print('Saving the subtracted normalised array')
-    savez_compressed(out_dir+'INTnew.npz',INTnew)
-
-
-    #denormalise the subtracted array
-    print('Denormalising the normalised subtracted array')
-    print('Saving the denormalised array')
-    INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
-    savez_compressed(out_dir+'INTnewnorm_whole.npz',(INTnewnorm_whole))
-
-    
-    
-def Add(INT_n,
-        INT_combined1,
-        outdir):
-    '''
-    Here we use Cluster exemplar addition method.
-    We feed the unnormalised intensity array at INT_un and
-    the normalised intensity array INT_n and the normalisation array INT_combined.
-    Here we perform HDBSCAN clustering on the normalised data from Prepdata.
-    Labels and Probaility are also  stored from  and they are stored. Exemplars 
-    are also stored from HDBSCAN. Then the following algorithm is used:
-    1) Do clustering and save the exemplars.
-    2) ADD the nearest exemplar from the normalized 3 beam data.
-    3) Multiply the normalization with subtracted data.
-    More details is in Thesis.
-    '''
-    
-        INT_prob1=[]  #probability
-        INT_2d=[]     #labels
-        INT_exemp=[]  #exemplars
-        
-        for i in range(0,INT_n.shape[1]):
-            clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
-                                      min_samples=None)
-            clusterer.fit(INT_n[:,i,:])
-            INT_pred=clusterer.labels_
-            n_clusters_=len(set(INT_pred)) -(1 if -1 in INT_pred else 0)
-            INT_pred=clusterer.labels_
-            INT_prob=clusterer.probabilities_
-
-            INT_exemp.append(clusterer.exemplars_)
-            INT_2d.append(INT_pred)
-            INT_prob1.append(INT_prob)
-
-
-        INT_prob1=np.array(INT_prob1)
-        INT_2d=np.array(INT_2d)
-        INT_exemp=np.array(INT_exemp)
-
-        savez_compressed(out_dir+'INT_prob1.npz',INT_prob1)
-        savez_compressed(out_dir+'INT_2d.npz',INT_2d)
-        savez_compressed(out_dir+'INT_exemp.npz',INT_exemp)
-
-        #exemplar subtraction
-        INT_n_part=INT_n
-        INT_2d_part=INT_2d
-        INT_exemp_part=INT_exemp
-        INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
-        ARGMIN=[]
-
+                     
+    if method=='SUB':
+                  
+        #The ACTUAL SUBTRACTION ALGORITHM
         for i in range(0,INT_2d.shape[0]):
+            for j in range(0,INT_2d.shape[1]):
+                INT_exemp_combined=np.vstack(INT_exemp_part[i])
+
+                label=INT_2d_part[i,j]
+                value=INT_n_part[j,i,:]
+
+                if label!=-1:
+
+                    argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
+                    INTnew[j,i,:]=value-(INT_exemp_part[i][label][argmin])
+
+                else:
+                    argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
+                    INTnew[j,i,:]=value-INT_exemp_combined[argmin]
+
+                ARGMIN.append(argmin)    
+        print('The subtracted normalised array has shape:',INTnew.shape)
+        #Save the normalised subtracted array
+        print('Saving the subtracted normalised array')
+        savez_compressed(out_dir+'INTnew.npz',INTnew)
+
+
+        #denormalise the subtracted array
+        print('Denormalising the normalised subtracted array')
+        print('Saving the denormalised array')
+        INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
+        savez_compressed(out_dir+'INTnewnorm_whole.npz',(INTnewnorm_whole))
+                     
+    
+      elif method=='ADD':
+                     
+          for i in range(0,INT_2d.shape[0]):
             for j in range(0,INT_2d.shape[1]):
                 INT_exemp_combined=np.vstack(INT_exemp_part[i])
 
@@ -313,14 +265,19 @@ def Add(INT_n,
 
                 ARGMIN.append(argmin)    
 
-
+        print('The ADD method normalised array has shape:',INTnew.shape)
+        print('Saving the ADD method normalised array')
         print(INTnew.shape)    
         savez_compressed(out_dir+'INTnew.npz',INTnew)
 
         #denormalise the array
+        print('Denormalising the normalised subtracted array')
+        print('Saving the denormalised array')
         INTnewnorm_whole=(INTnew.T+1)/INT_combined1 #cleaned unnorm array
         savez_compressed(out_dir+'INTnewnorm_whole.npz',(INTnewnorm_whole))
+         
 
+    
 
 if __name__ == '__main__':
 
@@ -370,15 +327,15 @@ if __name__ == '__main__':
         if args.technique=='sub':
            print('Choosing Sub method for full data processing')
            print('See theses, contact me for more information on these two methods')
-           Sub(INT_n,
+           Full_Channel_Clusater(INT_n,
                 INT_combined1,
-                out_dir)
+                out_dir,'SUB')
             
         elif args.technique=='add':
              print('Choosing Add method for full data processing')
              print('See theses, contact me for more information on these two methods')
-             Add(INT_n,
+             Full_Channel_CLuster(INT_n,
                 INT_combined1,
-                out_dir)
+                out_dir,'ADD')
             
             
