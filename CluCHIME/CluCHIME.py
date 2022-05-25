@@ -12,13 +12,16 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from sklearn.datasets import make_blobs
+from numpy import quantile, where, random
+from mpl_toolkits import mplot3d
+from sklearn.cluster import DBSCAN
 import time
 from numpy import asarray
-
 from numpy import savetxt 
+from sklearn.cluster import OPTICS, cluster_optics_dbscan
 import hdbscan
 import seaborn as sns
 from numpy import save
@@ -27,7 +30,6 @@ from numpy import savez_compressed
 import datetime, time
 from frb_common import common_utils
 from iautils import cascade, spectra, spectra_utils
-
 from iautils.conversion import chime_intensity
 from numpy import inf
 import glob 
@@ -127,115 +129,7 @@ class CluCHIME:
         savez_compressed('INT_n.npz',INT_n)
         
         
-        
-        
-        
-    def Sub(self,
-            INT_n,
-            INT_combined1):
-        '''
-        Here we use Cluster exemplar subtraction method.
-        We feed the unnormalised intensity array at INT_un and
-        the normalised intensity array INT_n and the normalisation array INT_combined.
-        Here we perform HDBSCAN clustering on the normalised data from Prepdata. 
-        For HDBSCAN I dont provide the option to change the min cluster size and min sample size 
-        parameters as those defined parameters give the better clustering for this data.
-        Labels and Probaility are also  stored from  and they are stored. Exemplars 
-        are also stored from HDBSCAN. Then the following algorithm is used:
-        1) Do clustering and save the exemplars.
-        2) Subtract the nearest exemplar from the normalized 3 beam data.
-        3) Multiply the normalization with subtracted data.
-        More details is in Thesis.
-        '''
-        
-        self.INT_n=INT_n
-        self.INT_combined1=INT_combined1
-        
-        #Loading the arrays 
-        INT_n=np.load('INT_n.npz')
-        INT_n=INT_n['arr_0']
-        
-        INT_combined1=np.load('INT_combined1.npz')
-        INT_combined1=INT_combined1['arr_0']
-       
-
-
-
-        #Run HDBSCAN on entire 16384 channels
-        start=time.time()
-        
-        INT_prob1=[]  #probability
-        INT_2d=[]     #labels
-        INT_exemp=[]  #exemplars
-        for i in range(0,INT_n.shape[1]):
-            clusterer=hdbscan.HDBSCAN(min_cluster_size=20,
-                                      min_samples=None)
-            clusterer.fit(INT_n[:,i,:])
-            INT_pred=clusterer.labels_
-            n_clusters_=len(set(INT_pred)) -(1 if -1 in INT_pred else 0)
-            INT_pred=clusterer.labels_
-            INT_prob=clusterer.probabilities_
-
-            INT_exemp.append(clusterer.exemplars_)
-            INT_2d.append(INT_pred)
-            INT_prob1.append(INT_prob)
-
-        #convert the python lists from HDBSCAN to numpy arrays
-        INT_prob1=np.array(INT_prob1)
-        INT_2d=np.array(INT_2d)
-        INT_exemp=np.array(INT_exemp) 
-
-
-        #save the arrays as comprressed numpy files, .npz files
-        savez_compressed('INT_prob1.npz',INT_prob1)
-        savez_compressed('INT_2d.npz',INT_2d)
-        savez_compressed('INT_exemp.npz',INT_exemp)
-
-
-
-        #Exemplar subtraction algorithm
-        #Just renaming the arrays to be fed in the for loop 
-        INT_n_part=INT_n
-        INT_2d_part=INT_2d
-        INT_exemp_part=INT_exemp
-        INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
-        ARGMIN=[]
-        #The ACTUAL SUBTRACTION ALGORITHM
-        for i in range(0,INT_2d.shape[0]):
-            for j in range(0,INT_2d.shape[1]):
-                INT_exemp_combined=np.vstack(INT_exemp_part[i])
-
-                label=INT_2d_part[i,j]
-                value=INT_n_part[j,i,:]
-
-                if label!=-1:
-
-                    argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
-                    INTnew[j,i,:]=value-(INT_exemp_part[i][label][argmin])
-
-                else:
-                    argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
-                    INTnew[j,i,:]=value-INT_exemp_combined[argmin]
-
-                ARGMIN.append(argmin)    
-
-
-        end=time.time()
-        print('Time taken for code run in sec:',end-start)
-        print('The subtracted normalised array has shape:',INTnew.shape)
-        
-        #Save the normalised subtracted array
-        print('Saving the subtracted normalised array')
-        savez_compressed('INTnew.npz',INTnew)
-        
-        
-        #denormalise the subtracted array
-        print('Denormalising the normalised subtracted array')
-        print('Saving the denormalised array')
-        INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
-        savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
-        
-    def Single(self,
+    def Single_Channel_Cluster(self,
                INT_n,
                i):
         '''
@@ -295,19 +189,21 @@ class CluCHIME:
 
         
         
-    def Add(self,
+    def Full_Channel_Cluster(self,
             INT_n,
-            INT_combined1):
+            INT_combined1,
+            method):
         '''
-        Here we use Cluster exemplar addition method.
-        We feed the unnormalised intensity array at INT_un and
-        the normalised intensity array INT_n and the normalisation array INT_combined.
-        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
-        Labels and Probaility are also  stored from  and they are stored. Exemplars 
-        are also stored from HDBSCAN. Then the following algorithm is used:
+        The following algorithm is used for ADD method:
         1) Do clustering and save the exemplars.
         2) ADD the nearest exemplar from the normalized 3 beam data.
         3) Multiply the normalization with subtracted data.
+        
+        The following algorithm is used for SUB method:
+        1) Do clustering and save the exemplars.
+        2) Subtract the nearest exemplar from the normalized 3 beam data.
+        3) Multiply the normalization with subtracted data.
+        More details is in Thesis.
         More details is in Thesis.
         '''
         self.INT_n=INT_n
@@ -358,34 +254,71 @@ class CluCHIME:
         INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
         ARGMIN=[]
 
-        for i in range(0,INT_2d.shape[0]):
-            for j in range(0,INT_2d.shape[1]):
-                INT_exemp_combined=np.vstack(INT_exemp_part[i])
+        if method=='ADD':
+            
+            for i in range(0,INT_2d.shape[0]):
+                for j in range(0,INT_2d.shape[1]):
+                    INT_exemp_combined=np.vstack(INT_exemp_part[i])
 
-                label=INT_2d_part[i,j]
-                value=INT_n_part[j,i,:]
+                    label=INT_2d_part[i,j]
+                    value=INT_n_part[j,i,:]
 
-                if label!=-1:
+                    if label!=-1:
 
-                    argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
-                    INTnew[j,i,:]=value+(INT_exemp_part[i][label][argmin])
+                        argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
+                        INTnew[j,i,:]=value+(INT_exemp_part[i][label][argmin])
 
-                else:
-                    argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
-                    INTnew[j,i,:]=value+INT_exemp_combined[argmin]
+                    else:
+                        argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
+                        INTnew[j,i,:]=value+INT_exemp_combined[argmin]
 
-                ARGMIN.append(argmin)    
-
-
-        end=time.time()
-        print(end-start)
-        print(INTnew.shape)    
-        savez_compressed('INTnew.npz',INTnew)
+                    ARGMIN.append(argmin)    
 
 
-        #denormalise the array
-        INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
-        savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
+            end=time.time()
+            print(end-start)
+            print(INTnew.shape)    
+            savez_compressed('INTnew.npz',INTnew)
+
+
+            #denormalise the array
+            INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
+            savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
+            
+        elif method=='SUB':
+            for i in range(0,INT_2d.shape[0]):
+                for j in range(0,INT_2d.shape[1]):
+                    INT_exemp_combined=np.vstack(INT_exemp_part[i])
+
+                    label=INT_2d_part[i,j]
+                    value=INT_n_part[j,i,:]
+
+                    if label!=-1:
+
+                        argmin=np.argmin(np.sum((value-INT_exemp_part[i][label])**2,axis=1))
+                        INTnew[j,i,:]=value-(INT_exemp_part[i][label][argmin])
+
+                    else:
+                        argmin=np.argmin(np.sum((value-INT_exemp_combined)**2,axis=1))
+                        INTnew[j,i,:]=value-INT_exemp_combined[argmin]
+
+                    ARGMIN.append(argmin)    
+
+
+            end=time.time()
+            print('Time taken for code run in sec:',end-start)
+            print('The subtracted normalised array has shape:',INTnew.shape)
+
+            #Save the normalised subtracted array
+            print('Saving the subtracted normalised array')
+            savez_compressed('INTnew.npz',INTnew)
+
+
+            #denormalise the subtracted array
+            print('Denormalising the normalised subtracted array')
+            print('Saving the denormalised array')
+            INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
+            savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
 
 
     def Iautils(self, 
@@ -639,9 +572,9 @@ class CluCHIME:
         ax2.set_yticks(fbins)
         ax2.set_yticklabels(np.round(np.flip(np.linspace(400,800,10))))
         ax2.set_ylabel("Frequency (MHz)", fontsize=18)
-        tbins=np.round(np.linspace(0,(FinalData[:,self.start:self.end]).shape[1],5),1)
+        tbins=np.round(np.linspace(0,(FinalData[:,self.start:self.end]).shape[1],10),1)
         ax2.set_xticks(tbins)
-        ax2.set_xticklabels(np.round(np.linspace(self.start/1000,self.end/1000,5),1))
+        ax2.set_xticklabels(np.round(np.linspace(self.start/1000,self.end/1000,10),2))
         ax2.set_xlabel("Time (s)", fontsize=18)
 
        # Adjust the colorbar on this axes alongside tables
@@ -657,3 +590,7 @@ class CluCHIME:
                                   min_width=1, 
                                   max_width=10, 
                                   plot=True)
+       
+        
+        
+        
