@@ -327,7 +327,7 @@ if __name__ == '__main__':
         if args.technique=='sub':
            print('Choosing Sub method for full data processing')
            print('See theses, contact me for more information on these two methods')
-           Full_Channel_Clusater(INT_n,
+           Full_Channel_Cluster(INT_n,
                 INT_combined1,
                 out_dir,'SUB')
             
