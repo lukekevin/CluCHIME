@@ -224,6 +224,7 @@ class CluCHIME:
         '''
         self.INT_n=INT_n
         self.INT_combined1=INT_combined1
+        self.method=method
 
         INT_n=np.load('INT_n.npz')
         INT_n=INT_n['arr_0']
@@ -270,7 +271,7 @@ class CluCHIME:
         INTnew=np.zeros_like(INT_n_part)     #the cleaned norm array
         ARGMIN=[]
 
-        if method=='ADD':
+        if self.method=='ADD':
             
             for i in range(0,INT_2d.shape[0]):
                 for j in range(0,INT_2d.shape[1]):
@@ -301,7 +302,7 @@ class CluCHIME:
             INTnewnorm_whole=(INTnew.T)/INT_combined1 #cleaned unnorm array
             savez_compressed('INTnewnorm_whole.npz',(INTnewnorm_whole))
             
-        elif method=='SUB':
+        elif self.method=='SUB':
             for i in range(0,INT_2d.shape[0]):
                 for j in range(0,INT_2d.shape[1]):
                     INT_exemp_combined=np.vstack(INT_exemp_part[i])
