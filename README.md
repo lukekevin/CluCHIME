@@ -14,8 +14,8 @@ The library is in primitive phase now and in future will be updated      accordi
 This CluCHIME library also streamlines and eases the various     relevant data  analysis from IAUTILS Python library. 
 
 
-The IAUTILS library was developed by Dr. Shriharsh Tendulkar et al      at CHIME/FRB Collaboration. For running CluCHIME library successfully you will     need NUMPY, SCIPY, Scikit-Learn, IAUTILS and frb-common utils preinstalled.     
+The IAUTILS library was developed by Dr. Shriharsh Tendulkar et al      at CHIME/FRB Collaboration. For running CluCHIME library successfully you will     need NUMPY, SCIPY, Scikit-Learn, IAUTILS and frb-common utils, DM_phase, FRB_constants libraries preinstalled.     
 
-The later 2 libraries are closed CHIME/FRB libraries from GITHUB. 
+The frb-common and FRB_constants libraries are closed CHIME/FRB libraries from GITHUB. 
 
-The code      is slow and not efficiet in terms of memory usage and needs to updated      accordingly in future. The average run times for CLUSTERING ANALYSIS on      full data is ~6 hrs on  Dr. Shriharsh Tendulkar's workstation PRITHVI      at TIFR which has 128 GB ram, 14 TB of disk space. On regular PC's   the run times will be much higher.
+
