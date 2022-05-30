@@ -14,8 +14,8 @@ The library is in primitive phase now and in future will be updated      accordi
 This CluCHIME library also streamlines and eases the various     relevant data  analysis from IAUTILS Python library. 
 
 
-The IAUTILS library was developed by Dr. Shriharsh Tendulkar et al      at CHIME/FRB Collaboration. For running CluCHIME library successfully you will     need NUMPY, SCIPY, Scikit-Learn, IAUTILS and frb-common utils, DM_phase, FRB_constants libraries preinstalled.     
+The intensity-analysis utils library was developed by Dr. Shriharsh Tendulkar et al      at CHIME/FRB Collaboration. For running CluCHIME library successfully you will     need NUMPY, SCIPY, Scikit-Learn, intensity-analysis utils, frb-common,  DM_phase, frb-constant libraries preinstalled.     
 
-The frb-common and FRB_constants libraries are closed CHIME/FRB libraries from GITHUB. 
+The frb-common, frb-constants, intensity-analysis utils libraries are closed CHIME/FRB libraries from GITHUB. 
 
 
