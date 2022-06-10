@@ -395,25 +395,44 @@ class CluCHIME:
                 dm,
                 beam):
         
-        '''
-         
-        After the exemplar subtraction has been done, the subtracted array is denormalized
-        using the normalization array we had saved in the beginning. Next on the denormalized array
-        from all 3 beams we apply various routines from IAUTILS.
-        The regular workflow on IAUTILS is as follows:
+        """
+        
+        The regular workflow on in this code block is as follows:
         1) Declare various constants and input parameters to be passed to cascade object in
         step 2.
         2) Make a cascade object containing data/ spectrum with cascade.py .
-        3) Dedisperse the data in a cascade object.
-        4) Subband the data in a cascade object.
-        5) Apply various analysis routines to detect pulse, determine SNR, optimise DM,
-        generate TIMESERIES on the spectra object. After dedispersion and subbanding a
-        spectra object is created within the cascade object from spectra.py script that works in
-        tandem with cascade.py
-        '''
+        3) Dedisperse the data from cascade object.
+        4) Subband the data from  cascade object.
+        5) Save the processed data and the timeseries.
         
-        
-         
+        Parameters
+        -----------
+        INTnewnorm_whole : str
+             String of path to the dir where the cleaned and normalised data obtained from previous step is stored.
+        INT_un : str
+             String of path to the dir where the unclean and unnormalised data is stored.
+        Weight : str
+             String of path of weights array for all 3 beams.
+        fpga0 : str
+             String of path of fpga0 values for all 3 beams.
+        fpgan : str
+             String of path of fpgan values for all 3 beams.
+        dm : float
+             Float value of the DM for dedispersion.
+        beam : str
+             Beam number to be processed.
+             
+        Returns 
+        -----------
+        Timeseries plot : Plot in matplotlib inline
+             Use the range in the timeseries where the pulse is present for the Waterfaller function.
+        FinalData : npz file
+             Final data array block after dedispersion, subbanding is done.
+        TIMESERIES : npz file
+             Timeseries array obtained for the final data block.
+             
+        """
+      
         #IAUTILS
         self.INT_un= INT_un
         self.INTnewnorm_whole= INTnewnorm_whole
@@ -438,35 +457,26 @@ class CluCHIME:
         fpgan=np.load('fpgan.npz')
         fpgan=fpgan['arr_0']
 
-
-
         INT_un1st=INT_un[0,:,:]
         INT_un2nd=INT_un[1,:,:]
         INT_un3rd=INT_un[2,:,:]
 
-
-       
         INTnewnorm_whole1st=INTnewnorm_whole[0,:,:]
         INTnewnorm_whole2nd=INTnewnorm_whole[1,:,:]
         INTnewnorm_whole3rd=INTnewnorm_whole[2,:,:]
 
-
-       
         Weight1=Weight[0,:,:]
         Weight2=Weight[1,:,:]
         Weight3=Weight[2,:,:]
-
 
         fpga01st=fpga0[0]
         fpga02nd=fpga0[1]
         fpga03rd=fpga0[2]
 
-
         fpgan1st=fpgan[0]
         fpgan2nd=fpgan[1]
         fpgan3rd=fpgan[2]
 
-        
         #making copies of arrays
         import copy 
         INTnewnorm_whole1st=copy.copy(INTnewnorm_whole1st)
@@ -493,14 +503,12 @@ class CluCHIME:
         INTmeanstd=np.array(INTmeanstd)
        
         '''
-        
 
         event_time = datetime.datetime.utcnow()
         fpga_time=481426529279
         time_range = 0.1
         dm_range = 0.5
         beam = beam
-
         
         if beam=='1_UNCLEAN':
             INTEN=INT_un1st
@@ -538,9 +546,7 @@ class CluCHIME:
             FPGA0=fpga03rd
             FPGAN=fpgan3rd 
             
-            
-            
-          #Cascade object from cascade.py     
+        #Cascade object from cascade.py     
         event = cascade.Cascade(intensities=[INTEN], 
                                     weights=[WEIGHT], 
                                     beam_nos=[beam],
@@ -559,14 +565,12 @@ class CluCHIME:
                                     use_rfi_masks=False,
                                    )
 
-
-
-            #DEDISPERSE
+       #DEDISPERSE
 
         event.dm = dm #558.4408569335938 #558.46   #558.4408569335938
 
 
-            #SUBBANDING
+       #SUBBANDING
             
         event.process_cascade(dm=dm, 
                               nsub=64, 
@@ -579,13 +583,12 @@ class CluCHIME:
                               scaleindep=True,
                               )
 
-            #making timeseries
+        #making timeseries
         TIMESERIES=((event.beams[0].generate_timeseries())[0])
-            #TIMESERIES[TIMESERIES<0]=0
         get_ipython().run_line_magic('matplotlib', 'inline')
-        plt.plot(TIMESERIES)  #[11000:13000])
-        print(np.argmax(TIMESERIES))
-
+        plt.plot(TIMESERIES)
+        plt.show()   
+     
 
         FinalData=event.beams[0].intensity
         savez_compressed('FinalData.npz',FinalData)
@@ -597,10 +600,27 @@ class CluCHIME:
                     TIMESERIES,
                     start, 
                     end) :
-        '''
-        Make a waterfall plot of the dedispersed,  subbanded array of
-        data from the spectra object which is created within the cascade object
-        '''
+       """
+       Generate a waterfall plot for a range of timestamps, plot the timeseries for the
+       range of timestamps and save them.
+       
+       Parameters
+       -----------
+       FinalData : str
+              String of the path where the final data from the previous step is stored.
+       TIMESERIES : str
+              String of the path where the timeseries from previous step is stored.
+       start : int
+              Approximate starting timestamp for the time range on timeseries obtained from previous function.
+       end : int
+              Approximate ending timestamp for the time range on timeseries obtained from previous function.
+       
+       Returns
+       -----------
+       Wterfall_Timeseries.jpg : jpg
+              Waterfaller plot and timeseries of the event.
+       
+       """
         
         self.FinalData=FinalData
         self.start=start
@@ -659,5 +679,3 @@ class CluCHIME:
                                   min_width=1, 
                                   max_width=10, 
                                   plot=True)
-        
-   
