@@ -210,6 +210,8 @@ def Full_Channel_Cluster(INT_n,
              Path to the normalised array having data from all 3 beams. 
         INT_combined1 : str
              Path to the normalising array for all 3 beams. 
+        out_dir : str
+             Path where to save the results.
         method : str, str value: 'ADD' or 'SUB'
              Method to be used while performing the data analysis.
              
