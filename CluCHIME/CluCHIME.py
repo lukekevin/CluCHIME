@@ -56,19 +56,42 @@ class CluCHIME:
                  pathname1 , 
                  pathname2,
                  pathname3):
-        ''' 
-        Prepping the DATA.
+        """
+         
+        Preparing the data for clustering by collecting the individual MSGPACK data packets,
+        collating them and then normalising them.
         
-        The individual .msg datapackets has shape 16384,1024 
-        which corresponds to 16384 frequency channels between 400 to 800 MHZ and 1024 
-        timestamps which corresponds to roughly 1 second of observation.For each 
-        beam there will be series of such .msgpack data packets leading to 
-        shape of 16384, n*1024 where n corresponds to no of individual data pakcets
-        and seconds of observation. If there are 10 seconds of data then the n=10  
-        packets are there etc. The mega array whether normalised or unnormalised has final 
-        shape of 16384,n*1024,3 where 3 corresponds to 3 beams for which this CluCHIME 
-        library was developed.
-        '''
+        Parameters
+        ----------
+        pathname1 : str
+            Path to the directory where data packets for 1st beam is stored.
+        pathname2 : str
+            Path to the directory where data packets for 2nd beam is stored. 
+        pathname3 : str
+            Path to the directory where data packets for 3rd beam is stored.
+       
+        Returns
+        -------
+        INT_combined1 : npz file
+            Normalisation array for all 3 beams.
+        INT_un : npz file
+            Unnormalised array having data from all 3 beams.  
+        INT_n : npz file
+            Normalised array having data from all 3 beams. 
+        Weight : npz file
+            Weights array for all 3 beams.
+        fpgan : npz file
+            Fpgan values for all 3 beams.
+        fpga0 : npz file
+            Fpga0 values for all 3 beams.
+        rfi_mask : npz file
+            RFI mask for all 3 beams.
+        frame_nano : npz file
+            Frame nano values for all 3 beams.
+        bins : npz file
+            Bins values for all 3 beams.
+        
+        """
         Intro='Author: Kevin Luke \nCluCHIME.py was made for MSc thesis project at TIFR, Mumbai \nDate created: 23 Nov 2021 \nDate last modified: Jan 20 2022'
         print(Intro)
         print('Collect data from dirs and do basic processing on them like normalisation')
@@ -148,13 +171,22 @@ class CluCHIME:
     def Single_Channel_Cluster(self,
                INT_n,
                i):
-        '''
+        """
         We perform HDBSCAN clustering on single channels of frequency.
-        We feed the unnormalised intensity array at INT_un and
-        the normalised intensity array INT_n and the normalisation array INT_combined.
-        Here we perform HDBSCAN clustering on the normalised data from Prepdata.
-        Labels and Probaility are also  stored from  and they are stored.
-        '''
+        
+        Parameters
+        ----------
+        INT_n : str
+             Path to the normalised array having data from all 3 beams. 
+        i : int
+             Channel number on which HDBSCAN analysis will be perfomed on.
+           
+        Returns
+        ----------     
+        Plot : jpg
+             Clustered plot obtained from HDBSCAN on single channels.
+            
+        """
         
         self.INT_n=INT_n
         self.i=i
@@ -191,37 +223,62 @@ class CluCHIME:
                           else (0.5, 0.5, 0.5)
                           for x in INT_2d]
         cluster_member_colors = [sns.desaturate(x, p) for x, p in
-                                 zip(cluster_colors, clusterer.probabilities_)]
-        #plt.scatter(*data.T, s=50, linewidth=0, c=cluster_member_colors, alpha=0.25)
-        #plt.title('HDBSCAN for min_cluster_size=30, min_sample=30')
+                                 zip(cluster_colors, 
+                                     clusterer.probabilities_)]
+        
         plt.xlabel('INT0')
         plt.ylabel('INT1')
-        plt.title('HDBSCAN on single frequencies')
+        plt.title('HDBSCAN on single channels.')
         plt.scatter(INT_n_part[:,0],
                     INT_n_part[:,1],
                     marker=".",
                     alpha=1,
                     c=cluster_member_colors) #color='b')
-
+        figname='HDBSCAN_on_single_channel_{}.jpg'.format(i)
+        plt.savefig(figname)
         
         
     def Full_Channel_Cluster(self,
             INT_n,
             INT_combined1,
             method):
-        '''
-        The following algorithm is used for ADD method:
+        """
+        The following algorithm is used for 'ADD' method:
         1) Do clustering and save the exemplars.
         2) ADD the nearest exemplar from the normalized 3 beam data.
         3) Multiply the normalization with subtracted data.
         
-        The following algorithm is used for SUB method:
+        The following algorithm is used for 'SUB' method:
         1) Do clustering and save the exemplars.
         2) Subtract the nearest exemplar from the normalized 3 beam data.
         3) Multiply the normalization with subtracted data.
+        
         More details is in Thesis.
-        More details is in Thesis.
-        '''
+        
+        Parameters
+        ----------
+        INT_n : str
+             Path to the normalised array having data from all 3 beams. 
+        INT_combined1 : str
+             Path to the normalising array for all 3 beams. 
+        method : str, str value: 'ADD' or 'SUB'
+             Method to be used while performing the data analysis.
+             
+        Returns
+        ----------
+        INT_prob1 : npz file
+             Probabiliies array obtained from HDBSCAN for all 3 beams.
+        INT_2d : npz file
+             Labels array for all 3 beams which HDBSCAN generates.
+        INT_exemp : npz file
+             Exemplars which are obtained for all 3 beams from HDBSCAN clustering.
+        INT_new : npz file
+             Ceaned unnormalised array obtained at the end of the processing.
+        INTnewnorm_wole : npz file
+             Cleaned and normalised array obtained finally.
+                 
+        """
+        
         self.INT_n=INT_n
         self.INT_combined1=INT_combined1
         self.method=method
@@ -234,8 +291,6 @@ class CluCHIME:
 
 
         #entire 16384 channels HDBSCAN
-        start=time.time()
-
         INT_prob1=[]  #probability
         INT_2d=[]     #labels
         INT_exemp=[]  #exemplars
@@ -261,10 +316,8 @@ class CluCHIME:
         savez_compressed('INT_2d.npz',INT_2d)
         savez_compressed('INT_exemp.npz',INT_exemp)
 
-
-
-        #exemplar subtraction
-
+        
+        #exemplar processing
         INT_n_part=INT_n
         INT_2d_part=INT_2d
         INT_exemp_part=INT_exemp
@@ -291,9 +344,6 @@ class CluCHIME:
 
                     ARGMIN.append(argmin)    
 
-
-            end=time.time()
-            print(end-start)
             print(INTnew.shape)    
             savez_compressed('INTnew.npz',INTnew)
 
@@ -322,10 +372,8 @@ class CluCHIME:
                     ARGMIN.append(argmin)    
 
 
-            end=time.time()
-            print('Time taken for code run in sec:',end-start)
             print('The subtracted normalised array has shape:',INTnew.shape)
-
+           
             #Save the normalised subtracted array
             print('Saving the subtracted normalised array')
             savez_compressed('INTnew.npz',INTnew)
@@ -431,7 +479,7 @@ class CluCHIME:
         INT_un3rd=copy.copy(INT_un3rd)
                
         
-     #meanSTD removal
+        #meanSTD removal
         '''
         INTcascade=INTnewnorm_whole2nd
 
