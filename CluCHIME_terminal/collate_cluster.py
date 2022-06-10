@@ -2,7 +2,7 @@
 Author: Kevin Luke 
 CluCHIME.py was made for MSc thesis project at TIFR, Mumbai
 Date created: 11 April 2022
-Date last modified: 12 April  2022
+Date last modified: 10 June  2022
 '''
 
 import argparse
@@ -18,34 +18,52 @@ import seaborn as sns
 
 ''' 
 THIS IS VERSION OF CODE CAN BE EXECUTED DIRECTLY FROM A TERMINAL
-For running this code successfully you will
-need NUMPY, SCIPY, Scikit-Learn, IAUTILS and frb-common utils preinstalled.
-The later 2 libraries are closed CHIME/FRB libraries from GITHUB. The code 
-is slow and not efficiet in terms of memory usage and needs to updated 
-accordingly in future. The average run times for CLUSTERING ANALYSIS on 
-full data is ~6 hrs on  Dr. Shriharsh Tendulkar's workstation PRITHVI 
-at TIFR which has 128 GB ram, 14 TB of disk space. On regular PC's
-the run times will be much higher.
 '''
     
 def collate(path1, 
             path2,
             path3
             out_dir):
-    ''' 
-    Prepping the DATA.
-
-    The individual .msg datapackets has shape 16384,1024 
-    which corresponds to 16384 frequency channels between 400 to 800 MHZ and 1024 
-    timestamps which corresponds to roughly 1 second of observation.For each 
-    beam there will be series of such .msgpack data packets leading to 
-    shape of 16384, n*1024 where n corresponds to no of individual data pakcets
-    and seconds of observation. If there are 10 seconds of data then the n=10  
-    packets are there etc. The mega array whether normalised or unnormalised has final 
-    shape of 16384,n*1024,3 where 3 corresponds to 3 beams for which this CluCHIME 
-    library was developed.
-    '''
     
+       """
+         
+        Preparing the data for clustering by collecting the individual MSGPACK data packets,
+        collating them and then normalising them.
+        
+        Parameters
+        ----------
+        path1 : str
+            Path to the directory where data packets for 1st beam is stored.
+        path2 : str
+            Path to the directory where data packets for 2nd beam is stored. 
+        path3 : str
+            Path to the directory where data packets for 3rd beam is stored.
+        out_dir : str
+            Path where to save the results.
+        
+        Returns
+        -------
+        INT_combined1 : npz file
+            Normalisation array for all 3 beams.
+        INT_un : npz file
+            Unnormalised array having data from all 3 beams.  
+        INT_n : npz file
+            Normalised array having data from all 3 beams. 
+        Weight : npz file
+            Weights array for all 3 beams.
+        fpgan : npz file
+            Fpgan values for all 3 beams.
+        fpga0 : npz file
+            Fpga0 values for all 3 beams.
+        rfi_mask : npz file
+            RFI mask for all 3 beams.
+        frame_nano : npz file
+            Frame nano values for all 3 beams.
+        bins : npz file
+            Bins values for all 3 beams.
+        
+        """
+        
     filelist1=glob.glob(path1)
     filelist1.sort()
     (I1,Weight1,
@@ -116,13 +134,23 @@ def collate(path1,
     return INT_un, INT_n,INT_combined1
     
 def Single(INT_n,i):
-    '''
-    We perform HDBSCAN clustering on single channels of frequency.
-    We feed the unnormalised intensity array at INT_un and
-    the normalised intensity array INT_n and the normalisation array INT_combined.
-    Here we perform HDBSCAN clustering on the normalised data from Prepdata.
-    Labels and Probaility are also  stored from  and they are stored.
-    '''
+                     
+        """
+        We perform HDBSCAN clustering on single channels of frequency.
+        
+        Parameters
+        ----------
+        INT_n : str
+             Path to the normalised array having data from all 3 beams. 
+        i : int
+             Channel number on which HDBSCAN analysis will be perfomed on.
+           
+        Returns
+        ----------     
+        Plot : jpg
+             Clustered plot obtained from HDBSCAN on single channels.
+            
+        """
 
    #Perform HDBSCAN on single channels of frequencies
     clusterer=hdbscan.HDBSCAN(min_cluster_size=17,
@@ -162,20 +190,44 @@ def Full_Channel_Cluster(INT_n,
         INT_combined1,
         out_dir,
         method):
-    '''
-    The following algorithm is used for SUB method:
-    1) Do clustering and save the exemplars.
-    2) Subtract the nearest exemplar from the normalized 3 beam data.
-    3) Multiply the normalization with subtracted data.
-    More details is in Thesis.
-    
-    
-    Then the following algorithm is used for ADD method:
-    1) Do clustering and save the exemplars.
-    2) ADD the nearest exemplar from the normalized 3 beam data.
-    3) Multiply the normalization with subtracted data.
-    '''
-    
+   
+        """
+        The following algorithm is used for 'ADD' method:
+        1) Do clustering and save the exemplars.
+        2) ADD the nearest exemplar from the normalized 3 beam data.
+        3) Multiply the normalization with subtracted data.
+        
+        The following algorithm is used for 'SUB' method:
+        1) Do clustering and save the exemplars.
+        2) Subtract the nearest exemplar from the normalized 3 beam data.
+        3) Multiply the normalization with subtracted data.
+        
+        More details is in Thesis.
+        
+        Parameters
+        ----------
+        INT_n : str
+             Path to the normalised array having data from all 3 beams. 
+        INT_combined1 : str
+             Path to the normalising array for all 3 beams. 
+        method : str, str value: 'ADD' or 'SUB'
+             Method to be used while performing the data analysis.
+             
+        Returns
+        ----------
+        INT_prob1 : npz file
+             Probabiliies array obtained from HDBSCAN for all 3 beams.
+        INT_2d : npz file
+             Labels array for all 3 beams which HDBSCAN generates.
+        INT_exemp : npz file
+             Exemplars which are obtained for all 3 beams from HDBSCAN clustering.
+        INT_new : npz file
+             Ceaned unnormalised array obtained at the end of the processing.
+        INTnewnorm_wole : npz file
+             Cleaned and normalised array obtained finally.
+                 
+        """
+                     
    #Run HDBSCAN on entire 16384 channels
     INT_prob1=[]  #probability
     INT_2d=[]     #labels
