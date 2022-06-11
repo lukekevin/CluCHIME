@@ -128,7 +128,7 @@ if __name__ == '__main__':
     args.START=START
     args.END=END
     
-    out_dir = out_dir_path + 'cluchime_clustering_code' + "/"
+    out_dir = out_dir_path + 'waterfaller' + "/"
     os.makedirs(out_dir, exist_ok=True)
     
     Waterfaller(FINALDATA,
