@@ -98,14 +98,14 @@ def collate(path1,
     fpga0=np.array([fpga01st,fpga02nd,fpga03rd])
     savez_compressed(out_dir'+'fpga0.npz',fpga0)
 
-    rfi_mask=np.array([rfi_mask1,rfi_mask2,rfi_mask3,])
+    rfi_mask=np.array([rfi_mask1,rfi_mask2,rfi_mask3])
     savez_compressed(out_dir+'rfi_mask.npz',rfi_mask)
 
     frame_nano=np.array([frame_nano1,frame_nano2,frame_nano3])
     savez_compressed(out_dir+'frame_nano.npz',frame_nano)
 
     bins=np.array([bins1,bins2,bins3])
-    savez_compressed(out_dirh+'bins.npz',bins)
+    savez_compressed(out_dir+'bins.npz',bins)
 
     #processing and collating the data
     #collating the 3 beam data into one mega array
