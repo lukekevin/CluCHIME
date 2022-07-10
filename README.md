@@ -10,5 +10,5 @@ For running CluCHIME library successfully you will  need `numpy, scipy, intensit
 
 ## Acknowledgments
 1) Dr. Shriharsh Tendulkar (My guide at TIFR Mumbai and fellow CHIME/FRB member).
-2) Nikhil Lodhe (Friend, IIT Gandhinagar MSc student).
+2) Nikhil Londhe (Friend, IIT Gandhinagar MSc student).
 3) The CHIME/FRB Collaboration (Data, various libraries).
