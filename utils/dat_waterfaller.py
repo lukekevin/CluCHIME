@@ -61,25 +61,29 @@ fil_fileobj = create_filterbank_fileobj('dat_data.fil',
 fil_fileobj.cwrite(spectra)
 fil_fileobj.close()
 
-
-
-
 #load the fil data and display the header info
 DM=30
-tdownsamp=2
+tdownsamp=1
 subband=4
-tstart=6000
-tend=6500
+
+time=10
 
 fil_path='dat_data.fil'
 fil_file=FilReader(fil_path)
 fil_file.header
 
 tsamp = fil_file.header.tsamp
-nsamples=fil_file.header.nsamples
+#nsamples=fil_file.header.nsamples
 
 # Process the fil data with various utilities of SIGPYPROC
-data=fil_file.read_block(tstart,tend)
+tsample = int(time / tsamp)
+
+print('nsamples',nsamples)
+print('tsample',tsample)
+print('tsamples-nsamples',tsample-nsamples)
+
+nsamples = 8192 // tdownsamp * tdownsamp # always read +/- 4096 samples as max disp delay at DM 3k will be within these
+data = fil_file.read_block(tsample - nsamples//2, nsamples)
 
 
 data[data==0]=np.nan
@@ -91,12 +95,28 @@ data[np.isnan(data)]=0
 data = data.dedisperse(DM)
 data = data.downsample(tdownsamp, subband)
 data = data.normalise()
-tseries = data.get_tim()/np.sqrt(data.header.nchans)
+tseries = data.get_tim()
 
-fig = plt.figure(figsize=(10, 5), dpi=100)
-spec = gridspec.GridSpec(ncols=2, nrows=2, 
-                         height_ratios=[2, 4],
-                         width_ratios=[2, 3])
+dt = tdownsamp*tsamp
+# Update the number of samples on time axis  after DOWNSAMPLING BY SIGPYPROC
+nsamples = nsamples // tdownsamp
+
+# Calculate the absolute arrival time
+t_start = t(fil_file.header.tstart, format='mjd')
+t_arr_rel = td(time, format='sec')
+t_arr_abs = t_start + t_arr_rel
+print('Time of Arrival of pulse:\n', t_arr_abs.iso)
+
+# Make ticks for the time and freq axes of waterfall
+xticklabels = np.round(np.linspace(-nsamples/2*dt, nsamples/2*dt, 100), 2)
+xticks = (xticklabels + xticklabels.max())/dt
+xlims = [xticks.max()/2 - 300/tdownsamp, xticks.max()/2 + 300/tdownsamp]
+#xlims=[xticks[0],xticks.max()]
+
+# Initiate a figure and make 4 grids in it for various subplots
+fig = plt.figure(figsize=(20, 10), dpi=100)
+spec = gridspec.GridSpec(ncols=2, nrows=2, height_ratios=[2, 4], width_ratios=[2, 3])
+
 
 freqs = np.linspace(800, 400., 9)
 yticks = (800 - freqs) / abs(data.header.foff)
@@ -104,18 +124,27 @@ yticks = (800 - freqs) / abs(data.header.foff)
 # Add timeseries
 ax1 = fig.add_subplot(spec[0])
 ax1.plot(tseries)
+ax1.set_xticks(xticks.astype(int))
+ax1.set_xlim(xlims)
 ax1.xaxis.set_visible(False)
 ax1.set_ylabel('SNR / bin ($\\sigma$ units)', fontsize=18)
-
 
 # Add the waterfall
 ax2 = fig.add_subplot(spec[2])
 imwf = ax2.imshow(data, aspect='auto', vmax=5, vmin=-5)
-ax2.set_xlabel("Timesamples", fontsize=18)
-ax2.set_ylabel("Frequencybands", fontsize=18)
-
+ax2.set_xticks(xticks.astype(int))
+ax2.set_xticklabels(np.round(xticklabels +time,1), fontsize=12)
+ax2.set_xlim(xlims)
+ax2.set_xlabel("Time (s)", fontsize=18)
+ax2.set_yticks(yticks.astype(int))
+ax2.set_yticklabels(freqs, fontsize=12)
+ax2.set_ylabel("Frequency (MHz)", fontsize=18)
 
 # Adjust the subplots and save the figure
 fig.subplots_adjust(.1, .1, .95, .95, 0, 0)
 outfname = "pulsar_waterfaler.jpg"
 fig.savefig(outfname, dpi=300)
+
+
+
+
