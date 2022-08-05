@@ -1,8 +1,9 @@
 # Simple routines from sigpyproc3
 ### Gaussian Data generator in Sigproc Filterbank format.
-Usage :**`python gaussian_filterbank.py --args`**
-Check the help section by doing **`python gaussian_filterbank.py --help`**
-You will require latest version of **numpy, sigpyproc** installed to run the code.
+<br />
+##### Usage
+`python gaussian_filterbank.py --args`
+<br /> <br /> You will require latest version of **numpy, sigpyproc** installed to run the code.
 
 ### msgpack_to_nparray_convert.py
 This code can be used for converting/ extracting the numpy arrays from the msgpack files conveniently and then the extracted numpy arrays are converted and saved to npz file.
