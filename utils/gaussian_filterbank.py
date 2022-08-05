@@ -8,6 +8,29 @@ from sigpyproc.io import sigproc
 def create_filterbank_fileobj(tmpfname, nchans, 
                               nsamples, tsamp, 
                               tstart, beam):
+  
+        """
+        Collect all the individual MSGPACK INTENSITY  datapackets of CHIME/FRB L1 NODE 
+        from the specified path and convert them to numpy array and then save them 
+        as .npz files.
+        Parameters
+        ----------
+        tmpfname : str
+            Name of the filterbank to be made.
+        nchans   : int
+            No of channels in the msgpack file.
+        nsamples : int
+            No of time samples in the msgpack file.
+        tsamp    : float
+            Sampling time of the CHIME/FRB msgpack data and HENCE the filterbank file.
+        tstart   : float
+            Start time in the filterbank file.
+        beam     : int
+            Beam number to be written in the filterbank file.
+        Returns
+        -------
+        filterbank object
+        """
     
     chan_bw = np.abs(800 - 400) / nchans
     header = dict(
