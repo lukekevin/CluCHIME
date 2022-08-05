@@ -1,13 +1,35 @@
-# Simple routines from sigpyproc3
-### Gaussian Data generator in Sigproc Filterbank format.
+# Simple routines
+
+### 1) dat_to_filterbank.py
+Dat file convertor to filterbank from the CHIME/SPS cluster. 
+<br />
+##### Usage
+ `python dat_to_filterbank.py --args`
+ 
+### 2) gaussian_filterbank.py 
+Create a simple filterbank file of nchannels and nsamples using gaussian noise.
 <br />
 ##### Usage
 `python gaussian_filterbank.py --args`
-<br /> <br /> You will require latest version of **numpy, sigpyproc** installed to run the code.
 
-### msgpack_to_nparray_convert.py
-This code can be used for converting/ extracting the numpy arrays from the msgpack files conveniently and then the extracted numpy arrays are converted and saved to npz file.
+### 3) msgpack_to_filterbank.py
+MSGPACK to filterbank file converter for the CHIME/FRB intensity data.
 <br />
 ##### Usage
-`python msgpack_to_nparray_convert.py --args` 
-<br /> <br /> In future a msgpack to filterbank converter will be maybe added here which could be useful if waterfallig is to be done by sigpyproc3 library.
+`python msgpack_to_filterbank.py --args` 
+
+
+### 4) msgpack_to_nparray.py
+MSGPACK to nparray file converter for the CHIME/FRB intensity data.
+<br />
+##### Usage
+`python msgpack_to_nparray.py --args` 
+
+
+
+
+
+
+
+
+
