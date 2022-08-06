@@ -25,6 +25,11 @@ MSGPACK to nparray file converter for the CHIME/FRB intensity data.
 ##### Usage
 `python msgpack_to_nparray.py --args` 
 
+### 5) dynamicspectra.py
+Plotting dynamic spectra i:e waterfall plots from the filterbank files
+<br />
+##### Usage
+`python dynamicspectra.py --args` 
 
 
 
