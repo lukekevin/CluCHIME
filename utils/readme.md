@@ -31,6 +31,11 @@ Plotting dynamic spectra i:e waterfall plots from the filterbank files
 ##### Usage
 `python dynamicspectra.py --args` 
 
+### 6) filpulse.py
+Creating a fake frb with Kendrick Smith's simpulse and putting it in filterbank format.
+<br />
+##### Usage
+`python filpulse.py --args` 
 
 
 
