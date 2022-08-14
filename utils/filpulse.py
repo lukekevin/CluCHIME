@@ -3,7 +3,7 @@ Creating a filterbank file with a fake frb in it.
 The code is an improved NON hardcoded version of Kendricks Smith's original
 example code for generating a fake frb with additional utility of pumping the created frb
 inside a GBT breakthrough file format Filterbank file. 
-The code is found at 
+The original code by Kendrick Smith is found at 
 https://kmsmith137.github.io/simpulse_docs/single_pulse.html
 """"
 
