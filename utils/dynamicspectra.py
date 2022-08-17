@@ -11,15 +11,40 @@ import argparse
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('fil_path', type=str)
-    parser.add_argument('--subband', type=int, default=8)
-    parser.add_argument('--time', type=float, default=800)
-    parser.add_argument('--DM', type=float, default=50)
-    parser.add_argument('--tdownsamp', type=int, default=1)
-    parser.add_argument('--sweep', type=int, default=8192)
-    parser.add_argument('--freqtop', type=float, default=800.)
-    parser.add_argument('--freqbottom', type=float, default=400.)
-    parser.add_argument('out_path', type=str)
+    parser.add_argument('fil_path', 
+                        type=str,
+                        help='Path where filterbank data is stored')
+    parser.add_argument('--subband', 
+                        type=int, 
+                        default=8,
+                        help='No of subband to be made.')
+    parser.add_argument('--time', 
+                        type=float, 
+                        default=800,
+                        help='Time of arrival of the undedispersed pulse')
+    parser.add_argument('--DM', 
+                        type=float,
+                        default=50,
+                        help='DM to which the data will be dedispersed')
+    parser.add_argument('--tdownsamp', 
+                        type=int, 
+                        default=1,
+                        help='Time downsampling')
+    parser.add_argument('--sweep', 
+                        type=int, 
+                        default=8192,
+                        help='Range of timesamples on either sides of the pulse')
+    parser.add_argument('--freqtop', 
+                        type=float, 
+                        default=800.,
+                        help='Top frequency of the data')
+    parser.add_argument('--freqbottom', 
+                        type=float, 
+                        default=400.,
+                        help='Bottom frequency')
+    parser.add_argument('out_path',
+                        type=str,
+                        help='Out path where the plots will be dumped')
 
     args = parser.parse_args()
     
