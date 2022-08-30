@@ -21,3 +21,5 @@ The `frb-common, frb-constants, intensity-analysis utils` libraries are closed C
 1) Dr. Shriharsh Tendulkar (My guide at TIFR Mumbai and fellow CHIME/FRB member).
 2) Nikhil Londhe (Friend, IIT Gandhinagar MSc student).
 3) The CHIME/FRB Collaboration (Data, various libraries).
+
+token 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
