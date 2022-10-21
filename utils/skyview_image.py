@@ -34,10 +34,3 @@ if __name__ == '__main__':
     ax.imshow(hdu.data)
     ax.set(xlabel="RA", ylabel="Dec")
     fig.savefig('skyimage.jpeg')
-        
-        
-    
-    
-  
-    
-    
