@@ -37,6 +37,12 @@ Creating a fake frb with Kendrick Smith's simpulse and putting it in filterbank 
 ##### Usage
 `python filpulse.py --args` 
 
+### 7) skyview_image.py
+Query any of the popular survey and plot the image for a given coordinate.
+<br />
+##### Usage
+`python skyview_image.py --args` 
+
 
 
 
