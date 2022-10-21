@@ -9,7 +9,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('name_loc', type=str)
-    parser.add_argument('--surveyname', type=str, default=None)
+    parser.add_argument('--surveyname',dest='surveyname',
+                        default=None, action='store_true')
 
     args = parser.parse_args()
     
