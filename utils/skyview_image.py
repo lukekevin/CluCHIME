@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from astroquery.skyview import SkyView
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
+import astropy.units as u
 
 if __name__ == '__main__':
 
@@ -19,13 +20,18 @@ if __name__ == '__main__':
     
     if surveyname is None:
         # Query for images centered on target name
-        hdu = SkyView.get_images(name_loc, survey='DSS')[0][0]
+        hdu = SkyView.get_images(name_loc,survey='DSS',
+        				radius= 1*u.deg)[0][0]
+        print('Using Defaul DSS survey with radius of 1 degree')
     else:
         print(SkyView.survey_dict)
         print('Enter name of survey:')
         survey_name=str(input())
+        print('Enter the radius to be zoomed in degree')
+        zoom_deg=float(input())
         # Query for images centered on target name
-        hdu = SkyView.get_images(name_loc, survey=survey_name)[0][0]
+        hdu = SkyView.get_images(name_loc, survey=survey_name,
+                                 radius= zoom_deg*u.deg)[0][0]
         
     # Tell matplotlib how to plot WCS axes
     wcs = WCS(hdu.header)
