@@ -10,7 +10,6 @@ from astroquery.skyview import SkyView
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 import astropy.units as u
-from astroquery.simbad import Simbad
 import astropy.coordinates as coord
 
 def skyview_image(name_loc, zoom_deg, surveyname=None):
@@ -38,24 +37,6 @@ def skyview_image(name_loc, zoom_deg, surveyname=None):
     ax.set(xlabel="RA", ylabel="Dec")
     fig.savefig('skyimage.jpeg')
     
-def simbad_query_for_skyview_image(zoom_deg,name_loc):
-    """
-    For the region entered do a simbad query to list all objects.
-    
-    
-    WARNING: !!!!! NOT ALL OBJECTS WILL BE FOUND FROM THE SKYVIEW IMAGE.
-    IT IS JUST AN APPROXIMATE LIST
-    """
-    
-    #Conver the string of RA AND DEC into suitable floats
-    name_loc.split(',')
-    RA=float(name_loc[0])
-    DEC=float(name_loc[1])
-    #Feed them into the location variable for the coordinates generation
-    location=coord.SkyCoord(ra=RA, dec=DEC,unit=(u.deg, u.deg), frame='fk5')
-    #The query and then the table is displayed
-    result_table = Simbad.query_region(location,radius=zoom_deg*u.deg)
-    print(result_table)
 
 if __name__ == '__main__':
 
@@ -65,15 +46,10 @@ if __name__ == '__main__':
     parser.add_argument('--surveyname',dest='surveyname',
                         default=None, action='store_true',
                        help='If this flag used then user can choose her own survey name for search')
-    
-    parser.add_argument('--simbad_search',dest='simbad_search',
-                        default=None, action='store_true',
-                       help='If this flag used then user can do a simbad search of the given region')
-    
+
     args = parser.parse_args()
     name_loc=args.name_loc
     surveyname=args.surveyname
-    simbad_search=args.simbad_search
     
     print('Enter the radius to be zoomed in degree')
     zoom_deg=float(input())
@@ -83,10 +59,4 @@ if __name__ == '__main__':
         skyview_image(name_loc, zoom_deg,surveyname=None)
     else:
         skyview_image(name_loc, zoom_deg, surveyname=surveyname)
-    
-    #SIMBAD query for the list of the objects
-    """
-    WARNING: NOT ALL OBJECTS WILL BE FOUND FROM THE SKYVIEW IMAGE. IT IS JUST AN APPROXIMATE LIST
-    """
-    if simbad_search is not None:
-        simbad_query_for_skyview_image(zoom_deg,name_loc)
+ 
