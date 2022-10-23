@@ -6,7 +6,6 @@ The CluCHIME library and the tools here were made during my MSc thesis at TATA I
 
 The intensity-analysis utils library was developed by Dr. Shriharsh Tendulkar et al at CHIME/FRB Collaboration. 
 
-Along with the required codes for Msc theses, in the recent added folder 'utils' I have added a collection of various useful codes I have made for radio astronomy data analysis.
 
 ## Requirments
 For running CluCHIME library successfully you will  need 
