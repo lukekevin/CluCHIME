@@ -1,3 +1,8 @@
+"""
+Author: Kevin Luke
+Date: Created 23 OKT 2022
+"""
+
 import argparse
 import astropy
 import matplotlib.pyplot as plt
@@ -5,30 +10,21 @@ from astroquery.skyview import SkyView
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 import astropy.units as u
+from astroquery.simbad import Simbad
+import astropy.coordinates as coord
 
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('name_loc', type=str)
-    parser.add_argument('--surveyname',dest='surveyname',
-                        default=None, action='store_true')
-
-    args = parser.parse_args()
-    
-    name_loc=args.name_loc
-    surveyname=args.surveyname
+def skyview_image(name_loc, zoom_deg, surveyname=None):
+    """
+    Make a skyview search from a survey for a given region
+    """
     
     if surveyname is None:
         # Query for images centered on target name
-        hdu = SkyView.get_images(name_loc,survey='DSS',
-        				radius= 1*u.deg)[0][0]
-        print('Using Defaul DSS survey with radius of 1 degree')
+        hdu = SkyView.get_images(name_loc, survey='DSS',radius= 1*u.deg)[0][0]
     else:
         print(SkyView.survey_dict)
         print('Enter name of survey:')
         survey_name=str(input())
-        print('Enter the radius to be zoomed in degree')
-        zoom_deg=float(input())
         # Query for images centered on target name
         hdu = SkyView.get_images(name_loc, survey=survey_name,
                                  radius= zoom_deg*u.deg)[0][0]
@@ -41,3 +37,56 @@ if __name__ == '__main__':
     ax.imshow(hdu.data)
     ax.set(xlabel="RA", ylabel="Dec")
     fig.savefig('skyimage.jpeg')
+    
+def simbad_query_for_skyview_image(zoom_deg,name_loc):
+    """
+    For the region entered do a simbad query to list all objects.
+    
+    
+    WARNING: !!!!! NOT ALL OBJECTS WILL BE FOUND FROM THE SKYVIEW IMAGE.
+    IT IS JUST AN APPROXIMATE LIST
+    """
+    
+    #Conver the string of RA AND DEC into suitable floats
+    name_loc.split(',')
+    RA=float(name_loc[0])
+    DEC=float(name_loc[1])
+    #Feed them into the location variable for the coordinates generation
+    location=coord.SkyCoord(ra=RA, dec=DEC,unit=(u.deg, u.deg), frame='fk5')
+    #The query and then the table is displayed
+    result_table = Simbad.query_region(location,radius=zoom_deg*u.deg)
+    print(result_table)
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name_loc', type=str,
+                       help='Input the RA, DEC of the region. eg: 34.45,56,78')
+    parser.add_argument('--surveyname',dest='surveyname',
+                        default=None, action='store_true',
+                       help='If this flag used then user can choose her own survey name for search')
+    
+    parser.add_argument('--simbad_search',dest='simbad_search',
+                        default=None, action='store_true',
+                       help='If this flag used then user can do a simbad search of the given region')
+    
+    args = parser.parse_args()
+    name_loc=args.name_loc
+    surveyname=args.surveyname
+    simbad_search=args.simbad_search
+    
+    print('Enter the radius to be zoomed in degree')
+    zoom_deg=float(input())
+    
+    #Skyview image query
+    if surveyname is None:
+        skyview_image(name_loc, zoom_deg,surveyname=None)
+    else:
+        skyview_image(name_loc, zoom_deg, surveyname=surveyname)
+    
+    #SIMBAD query for the list of the objects
+    """
+    WARNING: NOT ALL OBJECTS WILL BE FOUND FROM THE SKYVIEW IMAGE. IT IS JUST AN APPROXIMATE LIST
+    """
+    if simbad_search is not None:
+        simbad_query_for_skyview_image(zoom_deg,name_loc)
