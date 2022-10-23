@@ -43,6 +43,11 @@ Query any of the popular survey and plot the image for a given coordinate.
 ##### Usage
 `python skyview_image.py --args` 
 
+### 8) simbad_query.py
+Query any of the simbad data base survey and print the table with all the objects.
+<br />
+##### Usage
+`python simbad_query.py --args` 
 
 
 
