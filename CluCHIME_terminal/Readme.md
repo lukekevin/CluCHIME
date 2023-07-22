@@ -21,4 +21,9 @@ The dedispersed, subbanded, dowmsapled data is loaded along with the timeseries 
 ##### Usage
 `python cascade_waterfaller.py --args` 
 
+### 4) msgpack_read.py
+Read and convert a list of msgpack files for a given event from CHIME/FRB 
+<br />
+##### Usage
+`python msgpack_read.py --args` 
 
