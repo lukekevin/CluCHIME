@@ -21,4 +21,3 @@ The `frb-common, frb-constants, intensity-analysis utils` libraries are closed C
 2) Nikhil Londhe (Friend, IIT Gandhinagar MSc student).
 3) The CHIME/FRB Collaboration (Data, various libraries).
 
-token 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
